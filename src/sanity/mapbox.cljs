@@ -2,28 +2,29 @@
   (:require [sanity.protocols :as sp]
             ["mapbox-gl" :as mapbox]))
 
-
 (extend-type mapbox/Marker
   sp/MapEntity
   (destroy! [this]
     (.remove this)
     nil)
   (set-opacity! [this opacity]
-    ;; No straightforward way to implement this.
+    ;; Mapbox markers are interesting. They're actually dom elements
+    ;; that are positioned relative to the map. So, to set the marker's
+    ;; opacity, we can just apply css styling. I'll leave the implementation
+    ;; of this method as an exercise for the reader.
     this)
 
   sp/MapMarker
-  (set-map! [this app-map]
-    (.addTo this app-map)
-    this)
   (set-position! [this {:keys [lat lng]}]
-    ;; unfortunately, mapbox and google maps do not agree
+    ;; Unfortunately, mapbox and google maps do not agree
     ;; on the representation of map positions.
     (.setLngLat this #js {:lon lng :lat lat})
     this))
 
 ;; Mapbox doesn't have polylines as a first-class entity.
 ;; So we make a record that implements the appropriate protocols.
+;; You can think of records as clojure maps that have methods
+;; associated with them.
 (defrecord MapboxPolyline [street-map id]
   sp/MapEntity
   (destroy! [this]
@@ -41,7 +42,7 @@
   (add-marker! [this {:keys [position] :as marker-config}]
     (-> (mapbox/Marker. #js {})
         (sp/set-position! position)
-        (sp/set-map! this)))
+        (.addTo this)))
   (add-polyline! [this {path :path
                         stroke-color :strokeColor
                         stroke-weight :strokeWeight

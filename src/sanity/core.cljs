@@ -15,17 +15,18 @@
       (sanity.google/new-google-map map-config)
       (sanity.mapbox/new-mapbox-map map-config))))
 
-(defn do-stuff []
+(defn setup []
+  (reset! app-map (init-map))
+  ;; Notice that it doesn't care if the map is google or mapbox.
+  ;; The correct implementation will be used regardless.
   (sp/add-marker! @app-map {:position {:lat 14.6091
                                        :lng 121.0223}}))
 
 (defn ^:export switch-provider []
   (swap! use-google not)
-  (reset! app-map (init-map))
-  (do-stuff))
+  (setup))
 
 (defn ^:export init []
   (let [switch-button (js/document.getElementById "switch-button")]
     (.addEventListener switch-button "click" switch-provider))
-  (reset! app-map (init-map))
-  (do-stuff))
+  (setup))

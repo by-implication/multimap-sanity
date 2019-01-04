@@ -11,9 +11,6 @@
     this)
 
   sp/MapMarker
-  (set-map! [this app-map]
-    (.setMap this app-map)
-    this)
   (set-position! [this position]
     (.setPosition this position)
     this))

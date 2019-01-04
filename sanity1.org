@@ -46,54 +46,60 @@ consistent, their APIs vary greatly across alternatives.
 
 Javascript's prototypes and classes may help bring sanity to this, but Clojure
 (and therefore ClojureScript) offers a slightly different approach with
-protocols: instead of dealing with a hierarchy, you deal with characteristics.
-I'll discuss the finer details later in this article.
-
-Briefly said, protocols are often likened to contracts or promises (no, not
-async promises.) but I like thinking of them as job descriptions. Here's a
-relatively contrived example:
-
-In general, restaurant wait-staff must have the following abilities:
-- Take orders
-- Serve food
-- Process payment
-
-In our extremely simplified mental model, so long as our candidates can perform
-those tasks competently, we could say they are interchangeable with each other.
-
+protocols: instead of dealing with a hierarchy, you deal with characteristics. I
+won't further compare prototypes and protocols, as this is out of the scope of
+this article.
 
 The great thing is, you can extend existing javascript types with your protocols
 
 Another great thing, protocols can be composed.
 
+The first step is in declaring the protocols (usually in a separate namespace,
+but not really necessary.) Please read the inline documentation--they're part of
+this article!
+
 #+BEGIN_SRC clojure
-;; app/mapping/maplike.cljs
-(ns app.mapping.ourmap)
+(ns sanity.protocols)
 
 (defprotocol MapLike
-  (get-dom-node [this])
-  (add-marker! [this marker-config])
-  (add-polyline! [this polyline-config]))
+  "Things-that-are-like-maps."
+  (get-dom-node [this]
+    "Returns the dom-node that this map is attached to.")
+  (add-marker! [this marker-config]
+    "For now, marker-config only has one relevant key: `:position`")
+  (add-polyline! [this polyline-config]
+    "polyline-config has three relevant keys: `:path`, `:stroke-color`, `:stroke-weight`"))
 
 (defprotocol MapEntity
-  (destroy! [this])
-  (set-opacity! [this opacity]))
+  "For anything that will appear on a map."
+  (destroy! [this]
+    "Everything can be destroyed!")
+  (set-opacity! [this opacity]
+    "Most map providers allow you to control the opacity of map entities.
+This method can be moved to more specific protocols, but it can stay here."))
 
 (defprotocol MapMarker
-  (set-map! [this app-map])
-  (set-position! [this position]))
-
+  "Specifically map markers."
+  (set-position! [this position]
+    "It makes sense for this to be a specifically marker thing, since it's a point.
+ This doesn't really make sense for shapes and lines."))
 #+END_SRC
 
-And then you would use that protocol.
+And now we can implement these protocols as appropriate. Note that in the
+following section, I will be using ~extend-type~, which modifies an existing
+type (like ~google.maps.Marker~) with additional methods that conform to the
+attached protocols. ~extend-type~ is not the only way to use protocols: there's
+~defrecord~ and ~reify~, and while they're safer to use than ~extend-type~,
+~extend-type~ makes a lot of things more convenient for us. Instead of having to
+store the native javascript object as a field in a ClojureScript data structure,
+we can just use the object itself.
 
 #+BEGIN_SRC clojure
-;; mapping/google.cljs
-(ns app.mapping.google
-  (:require [app.mapping.ourmap :as ourmap]))
+(ns sanity.google
+  (:require [sanity.protocols :as sp]))
 
 (extend-type js/google.maps.Marker
-  ourmap/MapEntity
+  sp/MapEntity
   (destroy! [this]
     (.setMap this nil)
     nil)
@@ -101,16 +107,13 @@ And then you would use that protocol.
     (.setOpacity this opacity)
     this)
 
-  ourmap/MapMarker
-  (set-map! [this app-map]
-    (.setMap this app-map)
-    this)
+  sp/MapMarker
   (set-position! [this position]
     (.setPosition this position)
     this))
 
 (extend-type js/google.maps.Polyline
-  ourmap/MapEntity
+  sp/MapEntity
   (destroy! [this]
     (.setMap this nil)
     nil)
@@ -119,51 +122,56 @@ And then you would use that protocol.
     this))
 
 (extend-type js/google.maps.Map
-  ourmap/MapLike
+  sp/MapLike
   (get-dom-node [this]
     (.getDiv this))
   (add-marker! [this marker-config]
-    (js/google.maps.Marker (clj->js marker-config)))
+    (js/google.maps.Marker. (clj->js (assoc marker-config
+                                            :map this))))
   (add-polyline! [this polyline-config]
-    (js/google.maps.Polyline (clj->js polyline-config))))
+    (js/google.maps.Polyline. (clj->js (assoc polyline-config
+                                              :map this)))))
 
 (defn new-google-map [map-config]
   (let [{:keys [dom-node center zoom]} map-config]
     (js/google.maps.Map. dom-node
-                         #js {:center center
+                         #js {:center (clj->js center)
                               :zoom zoom})))
 #+END_SRC
 
 And again in the mapbox namespace.
 
 #+BEGIN_SRC clojure
-(ns app.mapping.mapbox
-  (:require [app.mapping.ourmap :as ourmap]
+(ns sanity.mapbox
+  (:require [sanity.protocols :as sp]
             ["mapbox-gl" :as mapbox]))
 
+
 (extend-type mapbox/Marker
-  ourmap/MapEntity
+  sp/MapEntity
   (destroy! [this]
     (.remove this)
     nil)
   (set-opacity! [this opacity]
-    ;; No straightforward way to implement this.
+    ;; Mapbox markers are interesting. They're actually dom elements
+    ;; that are positioned relative to the map. So, to set the marker's
+    ;; opacity, we can just apply css styling. I'll leave the implementation
+    ;; of this method as an exercise for the reader.
     this)
 
-  ourmap/MapMarker
-  (set-map! [this app-map]
-    (.addTo this app-map)
-    this)
+  sp/MapMarker
   (set-position! [this {:keys [lat lng]}]
-    ;; unfortunately, mapbox and google maps do not agree
+    ;; Unfortunately, mapbox and google maps do not agree
     ;; on the representation of map positions.
     (.setLngLat this #js {:lon lng :lat lat})
     this))
 
 ;; Mapbox doesn't have polylines as a first-class entity.
 ;; So we make a record that implements the appropriate protocols.
+;; You can think of records as clojure maps that have methods
+;; associated with them.
 (defrecord MapboxPolyline [street-map id]
-  ourmap/MapEntity
+  sp/MapEntity
   (destroy! [this]
     (when (.getLayer street-map id)
       (.removeLayer street-map id))
@@ -173,17 +181,14 @@ And again in the mapbox namespace.
     (.setPaintProperty street-map id "line-opacity" opacity)))
 
 (extend-type mapbox/Map
-  ourmap/Maplike
+  sp/MapLike
   (get-dom-node [this]
     (.getContainer this))
-  (add-marker! [this {position :position
-                      app-map :map
-                      :as marker-config}]
+  (add-marker! [this {:keys [position] :as marker-config}]
     (-> (mapbox/Marker. #js {})
-        (ourmap/set-position! position)
-        (ourmap/set-map! app-map)))
-  (add-polyline! [this {app-map :map
-                        path :path
+        (sp/set-position! position)
+        (.addTo this)))
+  (add-polyline! [this {path :path
                         stroke-color :strokeColor
                         stroke-weight :strokeWeight
                         :as polyline-config}]
@@ -205,50 +210,55 @@ And again in the mapbox namespace.
                        :paint  {:line-color stroke-color
                                 :line-width stroke-weight}
                        :source line-source})]
-      (.addLayer app-map line-layer)
-      (map->MapboxPolyline {:street-map app-map
+      (.addLayer this line-layer)
+      (map->MapboxPolyline {:street-map this
                             :id         polyline-id}))))
+
+(defn new-mapbox-map [{:keys [dom-node center zoom style]}]
+  (let [{:keys [lat lng]} center]
+    (mapbox/Map. #js {:container dom-node
+                      :center    #js [lng lat]
+                      :zoom      zoom
+                      :style     "https://tiles.stadiamaps.com/styles/alidade_smooth.json"})))
 #+END_SRC
 
-And then...  use it.
+Now that our implementations are complete, we can use them.
 
 #+BEGIN_SRC clojure
-(ns app.client
-  (:require [app.mapping.maplike :as maplike]
-            [app.mapping.google :as google-maps]
-            [app.mapping.mapbox :as mapbox-maps]))
+(ns sanity.core
+  (:require [sanity.protocols :as sp]
+            [sanity.google]
+            [sanity.mapbox]))
 
-...
-(defn do-stuff-to-map
-  "We only use one namespace for maplike calls."
-  [{:keys [maplike] :as app-env}]
-  (let [app-map (maplike/init-map maplike (js/document.getElementById "map"))
-        some-marker (maplike/add-marker maplike app-map {:latitude  14.123456
-                                                         :longitude 121.012345})]
-    ;; then remove the marker for the sake of calling the `remove` method.
-    (maplike/remove-marker some-marker)))
-...
+(def use-google (atom false))
+(def app-map (atom nil))
 
-(defn map-providers
-  {:google (google-maps/GoogleMap.)
-   :mapbox (mapbox-maps/MapboxMap.)})
+(defn init-map []
+  (let [map-config {:dom-node (js/document.getElementById "map")
+                    :zoom     12
+                    :center   {:lat 14.6091
+                               :lng 121.0223}}]
+    (if @use-google
+      (sanity.google/new-google-map map-config)
+      (sanity.mapbox/new-mapbox-map map-config))))
 
-(defn init-app [{:keys [map-provider]}]
-  (some-app-constructor
-   {:maplike (get map-providers map-provider)
-    ...
-    }))
+(defn setup []
+  (reset! app-map (init-map))
+  ;; Notice that it doesn't care if the map is google or mapbox.
+  ;; The correct implementation will be used regardless.
+  (sp/add-marker! @app-map {:position {:lat 14.6091
+                                       :lng 121.0223}}))
 
-(def app-that-uses-mapbox (init-app {:map-provider :mapbox
-                                     ...
-                                     }))
-(def app-that-uses-google (init-app {:map-provider :google
-                                     ...
-                                     }))
+(defn ^:export switch-provider []
+  (swap! use-google not)
+  (setup))
 
+(defn ^:export init []
+  (let [switch-button (js/document.getElementById "switch-button")]
+    (.addEventListener switch-button "click" switch-provider))
+  (setup))
 #+END_SRC
 
-But wait, there's more! protocols can be composed
 
 * Classes and Protocols
 
