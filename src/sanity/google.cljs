@@ -32,9 +32,11 @@
   (get-dom-node [this]
     (.getDiv this))
   (add-marker! [this marker-config]
-    (js/google.maps.Marker (clj->js marker-config)))
+    (js/google.maps.Marker. (clj->js (assoc marker-config
+                                            :map this))))
   (add-polyline! [this polyline-config]
-    (js/google.maps.Polyline (clj->js polyline-config))))
+    (js/google.maps.Polyline. (clj->js (assoc polyline-config
+                                              :map this)))))
 
 (defn new-google-map [map-config]
   (let [{:keys [dom-node center zoom]} map-config]

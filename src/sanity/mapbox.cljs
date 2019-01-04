@@ -38,14 +38,11 @@
   sp/MapLike
   (get-dom-node [this]
     (.getContainer this))
-  (add-marker! [this {position :position
-                      app-map :map
-                      :as marker-config}]
+  (add-marker! [this {:keys [position] :as marker-config}]
     (-> (mapbox/Marker. #js {})
         (sp/set-position! position)
-        (sp/set-map! app-map)))
-  (add-polyline! [this {app-map :map
-                        path :path
+        (sp/set-map! this)))
+  (add-polyline! [this {path :path
                         stroke-color :strokeColor
                         stroke-weight :strokeWeight
                         :as polyline-config}]
@@ -67,8 +64,8 @@
                        :paint  {:line-color stroke-color
                                 :line-width stroke-weight}
                        :source line-source})]
-      (.addLayer app-map line-layer)
-      (map->MapboxPolyline {:street-map app-map
+      (.addLayer this line-layer)
+      (map->MapboxPolyline {:street-map this
                             :id         polyline-id}))))
 
 (defn new-mapbox-map [{:keys [dom-node center zoom style]}]
@@ -76,4 +73,4 @@
     (mapbox/Map. #js {:container dom-node
                       :center    #js [lng lat]
                       :zoom      zoom
-                      :style     style})))
+                      :style     "https://tiles.stadiamaps.com/styles/alidade_smooth.json"})))

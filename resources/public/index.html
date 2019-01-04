@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Multimap Sanity</title>
+    <link rel="stylesheet" href="css/mapbox-gl.css">
     <style type="text/css" media="screen">
       #map {
           height: 512px;
@@ -14,10 +15,13 @@
   </head>
   <body>
     <div id="map"></div>
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY">
+    <div>
+      <button id="switch-button">Switch</button>
+    </div>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPnij8CpghZ2gEoZmZeqG5ieVYKRZlc5k">
     </script>
     <script type="text/javascript" src="js/main.js"></script>
-    <script>
+    <script type="text/javascript">
       sanity.core.init();
     </script>
   </body>
