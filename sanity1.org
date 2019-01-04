@@ -1,0 +1,273 @@
+#+TITLE: Multiple Service Sanity with ClojureScript
+#+SUBTITLE: Part 1 - An Introduction to Protocols
+
+* Introduction
+
+In early 2018, google announced a change in the pricing of their maps services,
+finally implementing it half a year later. The new prices would have been
+prohibitively expensive for many tech companies (think thousands of U.S. dollars a
+month) and many scrambled to find alternatives. Along with everyone else who was
+affected, we had to:
+
+1. Find alternative service providers for each google maps service we used
+2. Compare pricing, quality, and licensing (Many providers, while good, forbade
+   the combination of their service with others. Even more maddening, few
+   actually support the Philippines.)
+3. Decide, and then implement across all affected platforms.
+
+The problem is, of course, that step 3 is a lot of engineering effort, and steps
+1 and 2 take time. When customer satisfaction and operation costs are on the
+line, one does not simply say:
+
+#+BEGIN_QUOTE
+"Nah, fam. I already implemented the thing. We're stuck with this suboptimal
+service because it would take too much effort to switch."
+#+END_QUOTE
+
+We can't wait 5 months for a final decision either.
+
+The solution then, is to start early and build out infrastructure to reasonably
+support every alternative.
+
+#+CAPTION: Sometimes, overengineering IS the answer.
+https://i.imgflip.com/2peutr.jpg
+
+We use two major features: the map and the geocoding service. We'll be focusing
+on the map because it's "read only". Information only flows from the app state
+into the map, and not the other way around. As for forward and reverse
+geocoding, that's for the next post in the series.
+
+* The Smart Way
+
+Modern mapping libraries have roughly the same features. Beyond displaying the
+map itself, one can expect to place markers or pins, draw lines and shapes, and
+control what part of the map is shown. While these features are relatively
+consistent, their APIs vary greatly across alternatives.
+
+Javascript's prototypes and classes may help bring sanity to this, but Clojure
+(and therefore ClojureScript) offers a slightly different approach with
+protocols: instead of dealing with a hierarchy, you deal with characteristics.
+I'll discuss the finer details later in this article.
+
+Briefly said, protocols are often likened to contracts or promises (no, not
+async promises.) but I like thinking of them as job descriptions. Here's a
+relatively contrived example:
+
+In general, restaurant wait-staff must have the following abilities:
+- Take orders
+- Serve food
+- Process payment
+
+In our extremely simplified mental model, so long as our candidates can perform
+those tasks competently, we could say they are interchangeable with each other.
+
+
+The great thing is, you can extend existing javascript types with your protocols
+
+Another great thing, protocols can be composed.
+
+#+BEGIN_SRC clojure
+;; app/mapping/maplike.cljs
+(ns app.mapping.ourmap)
+
+(defprotocol MapLike
+  (get-dom-node [this])
+  (add-marker! [this marker-config])
+  (add-polyline! [this polyline-config]))
+
+(defprotocol MapEntity
+  (destroy! [this])
+  (set-opacity! [this opacity]))
+
+(defprotocol MapMarker
+  (set-map! [this app-map])
+  (set-position! [this position]))
+
+#+END_SRC
+
+And then you would use that protocol.
+
+#+BEGIN_SRC clojure
+;; mapping/google.cljs
+(ns app.mapping.google
+  (:require [app.mapping.ourmap :as ourmap]))
+
+(extend-type js/google.maps.Marker
+  ourmap/MapEntity
+  (destroy! [this]
+    (.setMap this nil)
+    nil)
+  (set-opacity! [this opacity]
+    (.setOpacity this opacity)
+    this)
+
+  ourmap/MapMarker
+  (set-map! [this app-map]
+    (.setMap this app-map)
+    this)
+  (set-position! [this position]
+    (.setPosition this position)
+    this))
+
+(extend-type js/google.maps.Polyline
+  ourmap/MapEntity
+  (destroy! [this]
+    (.setMap this nil)
+    nil)
+  (set-opacity! [this opacity]
+    (.setOptions this #js {:strokeOpacity opacity})
+    this))
+
+(extend-type js/google.maps.Map
+  ourmap/MapLike
+  (get-dom-node [this]
+    (.getDiv this))
+  (add-marker! [this marker-config]
+    (js/google.maps.Marker (clj->js marker-config)))
+  (add-polyline! [this polyline-config]
+    (js/google.maps.Polyline (clj->js polyline-config))))
+
+(defn new-google-map [map-config]
+  (let [{:keys [dom-node center zoom]} map-config]
+    (js/google.maps.Map. dom-node
+                         #js {:center center
+                              :zoom zoom})))
+#+END_SRC
+
+And again in the mapbox namespace.
+
+#+BEGIN_SRC clojure
+(ns app.mapping.mapbox
+  (:require [app.mapping.ourmap :as ourmap]
+            ["mapbox-gl" :as mapbox]))
+
+(extend-type mapbox/Marker
+  ourmap/MapEntity
+  (destroy! [this]
+    (.remove this)
+    nil)
+  (set-opacity! [this opacity]
+    ;; No straightforward way to implement this.
+    this)
+
+  ourmap/MapMarker
+  (set-map! [this app-map]
+    (.addTo this app-map)
+    this)
+  (set-position! [this {:keys [lat lng]}]
+    ;; unfortunately, mapbox and google maps do not agree
+    ;; on the representation of map positions.
+    (.setLngLat this #js {:lon lng :lat lat})
+    this))
+
+;; Mapbox doesn't have polylines as a first-class entity.
+;; So we make a record that implements the appropriate protocols.
+(defrecord MapboxPolyline [street-map id]
+  ourmap/MapEntity
+  (destroy! [this]
+    (when (.getLayer street-map id)
+      (.removeLayer street-map id))
+    (when (.getSource street-map id)
+      (.removeSource street-map id)))
+  (set-opacity! [this opacity]
+    (.setPaintProperty street-map id "line-opacity" opacity)))
+
+(extend-type mapbox/Map
+  ourmap/Maplike
+  (get-dom-node [this]
+    (.getContainer this))
+  (add-marker! [this {position :position
+                      app-map :map
+                      :as marker-config}]
+    (-> (mapbox/Marker. #js {})
+        (ourmap/set-position! position)
+        (ourmap/set-map! app-map)))
+  (add-polyline! [this {app-map :map
+                        path :path
+                        stroke-color :strokeColor
+                        stroke-weight :strokeWeight
+                        :as polyline-config}]
+    ;; This bit is long because mapbox treats polylines differently from google maps.
+    ;; Remember what I said about vastly different APIs? :P
+    (let [polyline-id (random-uuid)
+          line-source {:type "geojson"
+                       :data {:type     "Feature"
+                              :geometry {:type        "LineString"
+                                         :properties  {}
+                                         :coordinates (map (fn [{:keys [lat lng]}]
+                                                             [lng lat])
+                                                           path)}}}
+          line-layer (clj->js
+                      {:id     polyline-id
+                       :type   "line"
+                       :layout {:line-join "round"
+                                :line-cap  "round"}
+                       :paint  {:line-color stroke-color
+                                :line-width stroke-weight}
+                       :source line-source})]
+      (.addLayer app-map line-layer)
+      (map->MapboxPolyline {:street-map app-map
+                            :id         polyline-id}))))
+#+END_SRC
+
+And then...  use it.
+
+#+BEGIN_SRC clojure
+(ns app.client
+  (:require [app.mapping.maplike :as maplike]
+            [app.mapping.google :as google-maps]
+            [app.mapping.mapbox :as mapbox-maps]))
+
+...
+(defn do-stuff-to-map
+  "We only use one namespace for maplike calls."
+  [{:keys [maplike] :as app-env}]
+  (let [app-map (maplike/init-map maplike (js/document.getElementById "map"))
+        some-marker (maplike/add-marker maplike app-map {:latitude  14.123456
+                                                         :longitude 121.012345})]
+    ;; then remove the marker for the sake of calling the `remove` method.
+    (maplike/remove-marker some-marker)))
+...
+
+(defn map-providers
+  {:google (google-maps/GoogleMap.)
+   :mapbox (mapbox-maps/MapboxMap.)})
+
+(defn init-app [{:keys [map-provider]}]
+  (some-app-constructor
+   {:maplike (get map-providers map-provider)
+    ...
+    }))
+
+(def app-that-uses-mapbox (init-app {:map-provider :mapbox
+                                     ...
+                                     }))
+(def app-that-uses-google (init-app {:map-provider :google
+                                     ...
+                                     }))
+
+#+END_SRC
+
+But wait, there's more! protocols can be composed
+
+* Classes and Protocols
+
+Consider pigeons, penguins, submarines, and airplanes.
+
+In typical class-based systems, you would model them as
+- Pigeons and penguins are Birds
+- Submarines and airplanes are Vehicles
+But pigeons and submarines both dive, and pigeons and airplanes fly. Since
+penguins and submarines are from different classes, their dive methods
+
+With protocols
+- Pigeons implement Birdlike, Flier
+- Penguins implement Birdlike, Diver
+- Submarines implement Vehicle, Diver
+- Airplanes implement Vehicle, Flier
+
+With classes, birds and airplanes couldn't easily share polymorphism for flying.
+They could look like they share the same interface for flying, but they belong
+to different hierarchies, and so can change independently of each other. With
+protocols, they literally share the same Flyer protocol, so any change in API
+would result in both birds and airplanes updating.
