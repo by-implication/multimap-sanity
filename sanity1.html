@@ -1,0 +1,636 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2019-01-08 Tue 16:51 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Multiple Service Sanity with ClojureScript</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Levi Tan Ong" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Multiple Service Sanity with ClojureScript
+<br />
+<span class="subtitle">Part 1 - An Introduction to Protocols</span>
+</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org513a271">1. Introduction</a></li>
+<li><a href="#org1267811">2. Protocols and Classes</a>
+<ul>
+<li><a href="#org65b314d">2.1. Classes</a></li>
+</ul>
+</li>
+<li><a href="#orgaa5828a">3. Protocol Declaration</a></li>
+<li><a href="#orge1d38d3">4. Protocol Implementation</a></li>
+<li><a href="#org4bfe390">5. Final Remarks</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org513a271" class="outline-2">
+<h2 id="org513a271"><span class="section-number-2">1</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+In early 2018, google announced a change in the pricing of their maps services,
+finally implementing it half a year later. The new prices would have been
+prohibitively expensive for many tech companies (think thousands of U.S. dollars a
+month) and many scrambled to find alternatives. Along with everyone else who was
+affected, we had to:
+</p>
+
+<ol class="org-ol">
+<li>Find alternative service providers for each google maps service we used</li>
+<li>Compare pricing, quality, and licensing (Many providers, while good, forbade
+the combination of their service with others. Even more maddening, few
+actually support the Philippines.)</li>
+<li>Decide, and then implement across all affected platforms.</li>
+</ol>
+
+<p>
+The problem is, of course, that step 3 is a lot of engineering effort, and steps
+1 and 2 take time. When customer satisfaction and operation costs are on the
+line, one does not simply say:
+</p>
+
+<blockquote>
+<p>
+"Nah, fam. I already implemented the thing. We're stuck with this suboptimal
+service because it would take too much effort to switch."
+</p>
+</blockquote>
+
+<p>
+We can't wait 5 months for a final decision either.
+</p>
+
+<p>
+The solution then, is to start early and build out infrastructure to reasonably
+support every alternative.
+</p>
+
+
+<div class="figure">
+<p><img src="https://i.imgflip.com/2peutr.jpg" alt="2peutr.jpg" />
+</p>
+<p><span class="figure-number">Figure 1: </span>Sometimes, overengineering IS the answer.</p>
+</div>
+
+<p>
+We use two major features: the map and the geocoding service. We'll be focusing
+on the map because it's "read only". Information only flows from the app state
+into the map, and not the other way around. As for forward and reverse
+geocoding, that's for the next post in the series.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org1267811" class="outline-2">
+<h2 id="org1267811"><span class="section-number-2">2</span> Protocols and Classes</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Modern mapping libraries have roughly the same features. Beyond displaying the
+map itself, one can expect to place markers or pins, draw lines and shapes, and
+control what part of the map is shown. While these features are relatively
+consistent, their APIs vary greatly across alternatives.
+</p>
+
+<p>
+Javascript's prototypes and classes may help bring sanity to this, but Clojure
+(and therefore ClojureScript) offers a slightly different approach with
+protocols: instead of dealing with a hierarchy, you deal with characteristics.
+I'll give a quick example to illustrate the differences.
+</p>
+</div>
+
+<div id="outline-container-org65b314d" class="outline-3">
+<h3 id="org65b314d"><span class="section-number-3">2.1</span> Classes</h3>
+<div class="outline-text-3" id="text-2-1">
+<ul class="org-ul">
+<li>Chickens are flying birds</li>
+<li>Penguins are aquatic birds</li>
+<li>flying and aquatic birds are birds</li>
+<li>Bats are flying mammals</li>
+<li>Whales are aquatic mammals</li>
+<li>flying and aquatic mammals are mammals</li>
+<li>birds and mammals are animals</li>
+</ul>
+
+
+<div class="figure">
+<p><img src="./images/helloworld.png" alt="helloworld.png" />
+</p>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgaa5828a" class="outline-2">
+<h2 id="orgaa5828a"><span class="section-number-2">3</span> Protocol Declaration</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+The first step is in declaring the protocols (usually in a separate namespace,
+but not really necessary.) Please read the inline documentation&#x2013;they're part of
+this article!
+</p>
+
+<div class="org-src-container">
+<pre class="src src-clojure"><span style="color: #51afef;">(</span><span style="color: #51afef;">ns</span> <span style="color: #ECBE7B;">sanity.protocols</span><span style="color: #51afef;">)</span>
+
+<span style="color: #51afef;">(</span><span style="color: #51afef;">defprotocol</span> <span style="color: #ECBE7B;">MapLike</span>
+  <span style="color: #83898d;">"Things-that-are-like-maps."</span>
+  <span style="color: #c678dd;">(</span>get-dom-node <span style="color: #98be65;">[</span>this<span style="color: #98be65;">]</span>
+    <span style="color: #98be65;">"Returns the dom-node that this map is attached to."</span><span style="color: #c678dd;">)</span>
+  <span style="color: #c678dd;">(</span>add-marker! <span style="color: #98be65;">[</span>this marker-config<span style="color: #98be65;">]</span>
+    <span style="color: #98be65;">"For now, marker-config only has one relevant key: `</span><span style="color: #a9a1e1;">:position</span><span style="color: #98be65;">`"</span><span style="color: #c678dd;">)</span>
+  <span style="color: #c678dd;">(</span>add-polyline! <span style="color: #98be65;">[</span>this polyline-config<span style="color: #98be65;">]</span>
+    <span style="color: #98be65;">"Three relevant keys: `</span><span style="color: #a9a1e1;">:path</span><span style="color: #98be65;">`, `</span><span style="color: #a9a1e1;">:stroke-color</span><span style="color: #98be65;">`, `</span><span style="color: #a9a1e1;">:stroke-weight</span><span style="color: #98be65;">`"</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+
+<span style="color: #51afef;">(</span><span style="color: #51afef;">defprotocol</span> <span style="color: #ECBE7B;">MapEntity</span>
+  <span style="color: #83898d;">"For anything that will appear on a map."</span>
+  <span style="color: #c678dd;">(</span>destroy! <span style="color: #98be65;">[</span>this<span style="color: #98be65;">]</span>
+    <span style="color: #98be65;">"Everything can be destroyed!"</span><span style="color: #c678dd;">)</span>
+  <span style="color: #c678dd;">(</span>set-opacity! <span style="color: #98be65;">[</span>this opacity<span style="color: #98be65;">]</span>
+    <span style="color: #98be65;">"Most map providers allow you to control the opacity of map entities.</span>
+<span style="color: #98be65;">This method can be moved to more specific protocols, but it can stay here."</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+
+<span style="color: #51afef;">(</span><span style="color: #51afef;">defprotocol</span> <span style="color: #ECBE7B;">MapSingleEntity</span>
+  <span style="color: #83898d;">"Entities that exist as single points on a map, as opposed to lines and polygons."</span>
+  <span style="color: #c678dd;">(</span>set-position! <span style="color: #98be65;">[</span>this position<span style="color: #98be65;">]</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge1d38d3" class="outline-2">
+<h2 id="orge1d38d3"><span class="section-number-2">4</span> Protocol Implementation</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+And now we can implement these protocols as appropriate. Note that in the
+following section, I will be using <code>extend-type</code>, which modifies an existing
+type (like <code>google.maps.Marker</code>) with additional methods that conform to the
+attached protocols. <code>extend-type</code> is not the only way to use protocols: there's
+<code>defrecord</code> and <code>reify</code>, and while they're safer to use than <code>extend-type</code>,
+<code>extend-type</code> makes a lot of things more convenient for us. Instead of having to
+store the native javascript object as a field in a ClojureScript data structure,
+we can just use the object itself.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-clojure"><span style="color: #51afef;">(</span><span style="color: #51afef;">ns</span> <span style="color: #ECBE7B;">sanity.google</span>
+  <span style="color: #c678dd;">(</span><span style="color: #a9a1e1;">:require</span> <span style="color: #98be65;">[</span>sanity.protocols <span style="color: #a9a1e1;">:as</span> sp<span style="color: #98be65;">]</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+
+<span style="color: #51afef;">(</span>extend-type <span style="color: #ECBE7B;">js</span>/google.maps.Marker
+  <span style="color: #ECBE7B;">sp</span>/MapEntity
+  <span style="color: #c678dd;">(</span>destroy! <span style="color: #98be65;">[</span>this<span style="color: #98be65;">]</span>
+    <span style="color: #98be65;">(</span>.setMap this <span style="color: #a9a1e1;">nil</span><span style="color: #98be65;">)</span>
+    <span style="color: #a9a1e1;">nil</span><span style="color: #c678dd;">)</span>
+  <span style="color: #c678dd;">(</span>set-opacity! <span style="color: #98be65;">[</span>this opacity<span style="color: #98be65;">]</span>
+    <span style="color: #98be65;">(</span>.setOpacity this opacity<span style="color: #98be65;">)</span>
+    this<span style="color: #c678dd;">)</span>
+
+  <span style="color: #ECBE7B;">sp</span>/MapSingleEntity
+  <span style="color: #c678dd;">(</span>set-position! <span style="color: #98be65;">[</span>this position<span style="color: #98be65;">]</span>
+    <span style="color: #98be65;">(</span>.setPosition this position<span style="color: #98be65;">)</span>
+    this<span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+
+<span style="color: #51afef;">(</span>extend-type <span style="color: #ECBE7B;">js</span>/google.maps.Polyline
+  <span style="color: #ECBE7B;">sp</span>/MapEntity
+  <span style="color: #c678dd;">(</span>destroy! <span style="color: #98be65;">[</span>this<span style="color: #98be65;">]</span>
+    <span style="color: #98be65;">(</span>.setMap this <span style="color: #a9a1e1;">nil</span><span style="color: #98be65;">)</span>
+    <span style="color: #a9a1e1;">nil</span><span style="color: #c678dd;">)</span>
+  <span style="color: #c678dd;">(</span>set-opacity! <span style="color: #98be65;">[</span>this opacity<span style="color: #98be65;">]</span>
+    <span style="color: #98be65;">(</span>.setOptions this #js <span style="color: #51afef;">{</span><span style="color: #a9a1e1;">:strokeOpacity</span> opacity<span style="color: #51afef;">}</span><span style="color: #98be65;">)</span>
+    this<span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+
+<span style="color: #51afef;">(</span>extend-type <span style="color: #ECBE7B;">js</span>/google.maps.Map
+  <span style="color: #ECBE7B;">sp</span>/MapLike
+  <span style="color: #c678dd;">(</span>get-dom-node <span style="color: #98be65;">[</span>this<span style="color: #98be65;">]</span>
+    <span style="color: #98be65;">(</span>.getDiv this<span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span>
+  <span style="color: #c678dd;">(</span>add-marker! <span style="color: #98be65;">[</span>this marker-config<span style="color: #98be65;">]</span>
+    <span style="color: #98be65;">(</span><span style="color: #ECBE7B;">js</span>/google.maps.Marker. <span style="color: #51afef;">(</span>clj-&gt;js <span style="color: #c678dd;">(</span>assoc marker-config
+                                            <span style="color: #a9a1e1;">:map</span> this<span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span><span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span>
+  <span style="color: #c678dd;">(</span>add-polyline! <span style="color: #98be65;">[</span>this polyline-config<span style="color: #98be65;">]</span>
+    <span style="color: #98be65;">(</span><span style="color: #ECBE7B;">js</span>/google.maps.Polyline. <span style="color: #51afef;">(</span>clj-&gt;js <span style="color: #c678dd;">(</span>assoc polyline-config
+                                              <span style="color: #a9a1e1;">:map</span> this<span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span><span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+
+<span style="color: #51afef;">(</span><span style="color: #51afef;">defn</span> <span style="color: #c678dd;">new-google-map</span> <span style="color: #c678dd;">[</span>map-config<span style="color: #c678dd;">]</span>
+  <span style="color: #c678dd;">(</span><span style="color: #51afef;">let</span> <span style="color: #98be65;">[</span><span style="color: #51afef;">{</span><span style="color: #a9a1e1;">:keys</span> <span style="color: #c678dd;">[</span>dom-node center zoom<span style="color: #c678dd;">]</span><span style="color: #51afef;">}</span> map-config<span style="color: #98be65;">]</span>
+    <span style="color: #98be65;">(</span><span style="color: #ECBE7B;">js</span>/google.maps.Map. dom-node
+                         #js <span style="color: #51afef;">{</span><span style="color: #a9a1e1;">:center</span> <span style="color: #c678dd;">(</span>clj-&gt;js center<span style="color: #c678dd;">)</span>
+                              <span style="color: #a9a1e1;">:zoom</span> zoom<span style="color: #51afef;">}</span><span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+</pre>
+</div>
+
+<p>
+Notice also, that we declared the <code>google.maps.Marker</code> to implement both
+<code>MapEntity</code> and <code>MapSingleEntity</code> protocols. This composability helps us keep code DRY
+and semantically clear.
+</p>
+
+<p>
+Now let's implement the same protocol for mapbox.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-clojure"><span style="color: #51afef;">(</span><span style="color: #51afef;">ns</span> <span style="color: #ECBE7B;">sanity.mapbox</span>
+  <span style="color: #c678dd;">(</span><span style="color: #a9a1e1;">:require</span> <span style="color: #98be65;">[</span>sanity.protocols <span style="color: #a9a1e1;">:as</span> sp<span style="color: #98be65;">]</span>
+            <span style="color: #98be65;">[</span><span style="color: #98be65;">"mapbox-gl"</span> <span style="color: #a9a1e1;">:as</span> mapbox<span style="color: #98be65;">]</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+
+<span style="color: #51afef;">(</span>extend-type <span style="color: #ECBE7B;">mapbox</span>/Marker
+  <span style="color: #ECBE7B;">sp</span>/MapEntity
+  <span style="color: #c678dd;">(</span>destroy! <span style="color: #98be65;">[</span>this<span style="color: #98be65;">]</span>
+    <span style="color: #98be65;">(</span>.remove this<span style="color: #98be65;">)</span>
+    <span style="color: #a9a1e1;">nil</span><span style="color: #c678dd;">)</span>
+  <span style="color: #c678dd;">(</span>set-opacity! <span style="color: #98be65;">[</span>this opacity<span style="color: #98be65;">]</span>
+    <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">Mapbox markers are interesting. They're actually dom elements</span>
+    <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">that are positioned relative to the map. So, to set the marker's</span>
+    <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">opacity, we can just apply css styling. I'll leave the implementation</span>
+    <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">of this method as an exercise for the reader.</span>
+    this<span style="color: #c678dd;">)</span>
+
+  <span style="color: #ECBE7B;">sp</span>/MapSingleEntity
+  <span style="color: #c678dd;">(</span>set-position! <span style="color: #98be65;">[</span>this <span style="color: #51afef;">{</span><span style="color: #a9a1e1;">:keys</span> <span style="color: #c678dd;">[</span>lat lng<span style="color: #c678dd;">]</span><span style="color: #51afef;">}</span><span style="color: #98be65;">]</span>
+    <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">Unfortunately, mapbox and google maps do not agree</span>
+    <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">on the representation of map positions.</span>
+    <span style="color: #98be65;">(</span>.setLngLat this #js <span style="color: #51afef;">{</span><span style="color: #a9a1e1;">:lon</span> lng <span style="color: #a9a1e1;">:lat</span> lat<span style="color: #51afef;">}</span><span style="color: #98be65;">)</span>
+    this<span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+
+<span style="color: #5B6268;">;; </span><span style="color: #5B6268;">Mapbox doesn't have polylines as a first-class entity.</span>
+<span style="color: #5B6268;">;; </span><span style="color: #5B6268;">So we make a record that implements the appropriate protocols.</span>
+<span style="color: #5B6268;">;; </span><span style="color: #5B6268;">You can think of records as clojure maps that have methods</span>
+<span style="color: #5B6268;">;; </span><span style="color: #5B6268;">associated with them.</span>
+<span style="color: #51afef;">(</span><span style="color: #51afef;">defrecord</span> <span style="color: #ECBE7B;">MapboxPolyline</span> <span style="color: #c678dd;">[</span>street-map id<span style="color: #c678dd;">]</span>
+  <span style="color: #ECBE7B;">sp</span>/MapEntity
+  <span style="color: #c678dd;">(</span>destroy! <span style="color: #98be65;">[</span>this<span style="color: #98be65;">]</span>
+    <span style="color: #98be65;">(</span><span style="color: #51afef;">when</span> <span style="color: #51afef;">(</span>.getLayer street-map id<span style="color: #51afef;">)</span>
+      <span style="color: #51afef;">(</span>.removeLayer street-map id<span style="color: #51afef;">)</span><span style="color: #98be65;">)</span>
+    <span style="color: #98be65;">(</span><span style="color: #51afef;">when</span> <span style="color: #51afef;">(</span>.getSource street-map id<span style="color: #51afef;">)</span>
+      <span style="color: #51afef;">(</span>.removeSource street-map id<span style="color: #51afef;">)</span><span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span>
+  <span style="color: #c678dd;">(</span>set-opacity! <span style="color: #98be65;">[</span>this opacity<span style="color: #98be65;">]</span>
+    <span style="color: #98be65;">(</span>.setPaintProperty street-map id <span style="color: #98be65;">"line-opacity"</span> opacity<span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+
+<span style="color: #51afef;">(</span>extend-type <span style="color: #ECBE7B;">mapbox</span>/Map
+  <span style="color: #ECBE7B;">sp</span>/MapLike
+  <span style="color: #c678dd;">(</span>get-dom-node <span style="color: #98be65;">[</span>this<span style="color: #98be65;">]</span>
+    <span style="color: #98be65;">(</span>.getContainer this<span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span>
+  <span style="color: #c678dd;">(</span>add-marker! <span style="color: #98be65;">[</span>this <span style="color: #51afef;">{</span><span style="color: #a9a1e1;">:keys</span> <span style="color: #c678dd;">[</span>position<span style="color: #c678dd;">]</span> <span style="color: #a9a1e1;">:as</span> marker-config<span style="color: #51afef;">}</span><span style="color: #98be65;">]</span>
+    <span style="color: #98be65;">(</span><span style="color: #51afef;">-&gt;</span> <span style="color: #51afef;">(</span><span style="color: #ECBE7B;">mapbox</span>/Marker. #js <span style="color: #c678dd;">{}</span><span style="color: #51afef;">)</span>
+        <span style="color: #51afef;">(</span><span style="color: #ECBE7B;">sp</span>/set-position! position<span style="color: #51afef;">)</span>
+        <span style="color: #51afef;">(</span>.addTo this<span style="color: #51afef;">)</span><span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span>
+  <span style="color: #c678dd;">(</span>add-polyline! <span style="color: #98be65;">[</span>this <span style="color: #51afef;">{</span>path <span style="color: #a9a1e1;">:path</span>
+                        stroke-color <span style="color: #a9a1e1;">:strokeColor</span>
+                        stroke-weight <span style="color: #a9a1e1;">:strokeWeight</span>
+                        <span style="color: #a9a1e1;">:as</span> polyline-config<span style="color: #51afef;">}</span><span style="color: #98be65;">]</span>
+    <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">This bit is long because mapbox treats polylines differently from google maps.</span>
+    <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">Remember what I said about vastly different APIs? :P</span>
+    <span style="color: #98be65;">(</span><span style="color: #51afef;">let</span> <span style="color: #51afef;">[</span>polyline-id <span style="color: #c678dd;">(</span>random-uuid<span style="color: #c678dd;">)</span>
+          line-source <span style="color: #c678dd;">{</span><span style="color: #a9a1e1;">:type</span> <span style="color: #98be65;">"geojson"</span>
+                       <span style="color: #a9a1e1;">:data</span> <span style="color: #98be65;">{</span><span style="color: #a9a1e1;">:type</span>     <span style="color: #98be65;">"Feature"</span>
+                              <span style="color: #a9a1e1;">:geometry</span> <span style="color: #51afef;">{</span><span style="color: #a9a1e1;">:type</span>        <span style="color: #98be65;">"LineString"</span>
+                                         <span style="color: #a9a1e1;">:properties</span>  <span style="color: #c678dd;">{}</span>
+                                         <span style="color: #a9a1e1;">:coordinates</span> <span style="color: #c678dd;">(</span>map <span style="color: #98be65;">(</span><span style="color: #51afef;">fn</span> <span style="color: #51afef;">[</span><span style="color: #c678dd;">{</span><span style="color: #a9a1e1;">:keys</span> <span style="color: #98be65;">[</span>lat lng<span style="color: #98be65;">]</span><span style="color: #c678dd;">}</span><span style="color: #51afef;">]</span>
+                                                             <span style="color: #51afef;">[</span>lng lat<span style="color: #51afef;">]</span><span style="color: #98be65;">)</span>
+                                                           path<span style="color: #c678dd;">)</span><span style="color: #51afef;">}</span><span style="color: #98be65;">}</span><span style="color: #c678dd;">}</span>
+          line-layer <span style="color: #c678dd;">(</span>clj-&gt;js
+                      <span style="color: #98be65;">{</span><span style="color: #a9a1e1;">:id</span>     polyline-id
+                       <span style="color: #a9a1e1;">:type</span>   <span style="color: #98be65;">"line"</span>
+                       <span style="color: #a9a1e1;">:layout</span> <span style="color: #51afef;">{</span><span style="color: #a9a1e1;">:line-join</span> <span style="color: #98be65;">"round"</span>
+                                <span style="color: #a9a1e1;">:line-cap</span>  <span style="color: #98be65;">"round"</span><span style="color: #51afef;">}</span>
+                       <span style="color: #a9a1e1;">:paint</span>  <span style="color: #51afef;">{</span><span style="color: #a9a1e1;">:line-color</span> stroke-color
+                                <span style="color: #a9a1e1;">:line-width</span> stroke-weight<span style="color: #51afef;">}</span>
+                       <span style="color: #a9a1e1;">:source</span> line-source<span style="color: #98be65;">}</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">]</span>
+      <span style="color: #51afef;">(</span>.addLayer this line-layer<span style="color: #51afef;">)</span>
+      <span style="color: #51afef;">(</span>map-&gt;MapboxPolyline <span style="color: #c678dd;">{</span><span style="color: #a9a1e1;">:street-map</span> this
+                            <span style="color: #a9a1e1;">:id</span>         polyline-id<span style="color: #c678dd;">}</span><span style="color: #51afef;">)</span><span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+
+<span style="color: #51afef;">(</span><span style="color: #51afef;">defn</span> <span style="color: #c678dd;">new-mapbox-map</span> <span style="color: #c678dd;">[</span><span style="color: #98be65;">{</span><span style="color: #a9a1e1;">:keys</span> <span style="color: #51afef;">[</span>dom-node center zoom style<span style="color: #51afef;">]</span><span style="color: #98be65;">}</span><span style="color: #c678dd;">]</span>
+  <span style="color: #c678dd;">(</span><span style="color: #51afef;">let</span> <span style="color: #98be65;">[</span><span style="color: #51afef;">{</span><span style="color: #a9a1e1;">:keys</span> <span style="color: #c678dd;">[</span>lat lng<span style="color: #c678dd;">]</span><span style="color: #51afef;">}</span> center<span style="color: #98be65;">]</span>
+    <span style="color: #98be65;">(</span><span style="color: #ECBE7B;">mapbox</span>/Map. #js <span style="color: #51afef;">{</span><span style="color: #a9a1e1;">:container</span> dom-node
+                      <span style="color: #a9a1e1;">:center</span>    #js <span style="color: #c678dd;">[</span>lng lat<span style="color: #c678dd;">]</span>
+                      <span style="color: #a9a1e1;">:zoom</span>      zoom
+                      <span style="color: #a9a1e1;">:style</span>     <span style="color: #98be65;">"https://tiles.stadiamaps.com/styles/alidade_smooth.json"</span><span style="color: #51afef;">}</span><span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+</pre>
+</div>
+
+<p>
+Now that our implementation is complete for both providers, we can use them.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-clojure"><span style="color: #51afef;">(</span><span style="color: #51afef;">ns</span> <span style="color: #ECBE7B;">sanity.core</span>
+  <span style="color: #c678dd;">(</span><span style="color: #a9a1e1;">:require</span> <span style="color: #98be65;">[</span>sanity.protocols <span style="color: #a9a1e1;">:as</span> sp<span style="color: #98be65;">]</span>
+            <span style="color: #98be65;">[</span>sanity.google<span style="color: #98be65;">]</span>
+            <span style="color: #98be65;">[</span>sanity.mapbox<span style="color: #98be65;">]</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+
+<span style="color: #51afef;">(</span><span style="color: #51afef;">def</span> <span style="color: #dcaeea;">use-google</span> <span style="color: #83898d;">"So we can switch between google and mapbox."</span> <span style="color: #c678dd;">(</span>atom <span style="color: #a9a1e1;">false</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+<span style="color: #51afef;">(</span><span style="color: #51afef;">def</span> <span style="color: #dcaeea;">app-map</span> <span style="color: #83898d;">"Stores the map object. Can be either google or mapbox."</span> <span style="color: #c678dd;">(</span>atom <span style="color: #a9a1e1;">nil</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+
+<span style="color: #51afef;">(</span><span style="color: #51afef;">defn</span> <span style="color: #c678dd;">init-map</span> <span style="color: #c678dd;">[]</span>
+  <span style="color: #c678dd;">(</span><span style="color: #51afef;">let</span> <span style="color: #98be65;">[</span>map-config <span style="color: #51afef;">{</span><span style="color: #a9a1e1;">:dom-node</span> <span style="color: #c678dd;">(</span><span style="color: #ECBE7B;">js</span>/document.getElementById <span style="color: #98be65;">"map"</span><span style="color: #c678dd;">)</span>
+                    <span style="color: #a9a1e1;">:zoom</span>     <span style="color: #da8548; font-weight: bold;">12</span>
+                    <span style="color: #a9a1e1;">:center</span>   <span style="color: #c678dd;">{</span><span style="color: #a9a1e1;">:lat</span> <span style="color: #da8548; font-weight: bold;">14.6091</span>
+                               <span style="color: #a9a1e1;">:lng</span> <span style="color: #da8548; font-weight: bold;">121.0223</span><span style="color: #c678dd;">}</span><span style="color: #51afef;">}</span><span style="color: #98be65;">]</span>
+    <span style="color: #98be65;">(</span><span style="color: #51afef;">if</span> @use-google
+      <span style="color: #51afef;">(</span><span style="color: #ECBE7B;">sanity.google</span>/new-google-map map-config<span style="color: #51afef;">)</span>
+      <span style="color: #51afef;">(</span><span style="color: #ECBE7B;">sanity.mapbox</span>/new-mapbox-map map-config<span style="color: #51afef;">)</span><span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+
+<span style="color: #51afef;">(</span><span style="color: #51afef;">defn</span> <span style="color: #c678dd;">setup</span> <span style="color: #c678dd;">[]</span>
+  <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">Replace the `</span><span style="color: #a9a1e1;">app-map</span><span style="color: #5B6268;">` atom with the value of a newly initialized map.</span>
+  <span style="color: #c678dd;">(</span>reset! app-map <span style="color: #98be65;">(</span>init-map<span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span>
+  <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">Notice that it doesn't care if the map is google or mapbox.</span>
+  <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">The correct implementation will be used regardless.</span>
+  <span style="color: #c678dd;">(</span><span style="color: #ECBE7B;">sp</span>/add-marker! @app-map <span style="color: #98be65;">{</span><span style="color: #a9a1e1;">:position</span> <span style="color: #51afef;">{</span><span style="color: #a9a1e1;">:lat</span> <span style="color: #da8548; font-weight: bold;">14.6091</span>
+                                       <span style="color: #a9a1e1;">:lng</span> <span style="color: #da8548; font-weight: bold;">121.0223</span><span style="color: #51afef;">}</span><span style="color: #98be65;">}</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+
+<span style="color: #51afef;">(</span><span style="color: #51afef;">defn</span> ^<span style="color: #a9a1e1;">:export</span> <span style="color: #c678dd;">switch-provider</span> <span style="color: #c678dd;">[]</span>
+  <span style="color: #c678dd;">(</span>swap! use-google not<span style="color: #c678dd;">)</span>
+  <span style="color: #c678dd;">(</span>setup<span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+
+<span style="color: #51afef;">(</span><span style="color: #51afef;">defn</span> <span style="color: #c678dd;">init</span> <span style="color: #c678dd;">[]</span>
+  <span style="color: #c678dd;">(</span><span style="color: #51afef;">let</span> <span style="color: #98be65;">[</span>switch-button <span style="color: #51afef;">(</span><span style="color: #ECBE7B;">js</span>/document.getElementById <span style="color: #98be65;">"switch-button"</span><span style="color: #51afef;">)</span><span style="color: #98be65;">]</span>
+    <span style="color: #98be65;">(</span>.addEventListener switch-button <span style="color: #98be65;">"click"</span> switch-provider<span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span>
+  <span style="color: #c678dd;">(</span>setup<span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+</pre>
+</div>
+
+<p>
+At the time of writing, there is a <code>#wontfix</code> <a href="https://issuetracker.google.com/issues/35821412#comment32">memory leak</a> in google maps making
+it difficult to properly destroy a map instance. Having said this, I need to
+point out a few important things regarding this leak, and the exercise we just
+did.
+</p>
+
+<ol class="org-ol">
+<li>The google map we're instantiating here is very bare, and the memory leak is
+unlikely to affect this demo app much. For an actually useful webapp though,
+this leak will be non-trivial.</li>
+<li>You probably shouldn't even be switching between different map providers
+during runtime. Just comment things out, and refresh the browser. Our runtime
+switch is for illustrative purposes only.</li>
+<li>If things are really that bad that you need to support service switching
+right up to deployment, you can come up with compiler flags via <code>goog-define</code>
+that are basically variables that can be initialized based on build flags.</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org4bfe390" class="outline-2">
+<h2 id="org4bfe390"><span class="section-number-2">5</span> Final Remarks</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+Protocols are a powerful tool for creating and managing abstractions or
+interfaces to external services. They are not limited to our example above.
+Protocols can be used for database connections, display rendering, and more.
+</p>
+
+<p>
+In the next part of this series, I'll show you how we dealt with different
+geocoding providers using a webapp framework called fulcro.
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Levi Tan Ong</p>
+<p class="date">Created: 2019-01-08 Tue 16:51</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

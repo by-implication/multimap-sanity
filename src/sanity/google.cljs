@@ -10,7 +10,7 @@
     (.setOpacity this opacity)
     this)
 
-  sp/MapMarker
+  sp/MapSingleEntity
   (set-position! [this position]
     (.setPosition this position)
     this))

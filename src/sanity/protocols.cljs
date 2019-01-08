@@ -17,8 +17,6 @@
     "Most map providers allow you to control the opacity of map entities.
 This method can be moved to more specific protocols, but it can stay here."))
 
-(defprotocol MapMarker
-  "Specifically map markers."
-  (set-position! [this position]
-    "It makes sense for this to be a specifically marker thing, since it's a point.
- This doesn't really make sense for shapes and lines."))
+(defprotocol MapSingleEntity
+  "Entities that exist as single points on a map, as opposed to lines and polygons."
+  (set-position! [this position]))

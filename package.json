@@ -1,0 +1,13 @@
+{
+    "name": "package-name",
+    "description": "description",
+    "version": "1.0.0",
+    "author": "Levi Tan Ong <levi@Krypton.local>",
+    "license": "MIT",
+    "main": "app/main.js",
+    "scripts": {},
+    "dependencies": {
+        "mapbox-gl": "^0.52.0"
+    },
+    "devDependencies": {}
+}

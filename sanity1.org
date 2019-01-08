@@ -37,7 +37,7 @@ on the map because it's "read only". Information only flows from the app state
 into the map, and not the other way around. As for forward and reverse
 geocoding, that's for the next post in the series.
 
-* The Smart Way
+* Protocols and Classes
 
 Modern mapping libraries have roughly the same features. Beyond displaying the
 map itself, one can expect to place markers or pins, draw lines and shapes, and
@@ -45,14 +45,35 @@ control what part of the map is shown. While these features are relatively
 consistent, their APIs vary greatly across alternatives.
 
 Javascript's prototypes and classes may help bring sanity to this, but Clojure
-(and therefore ClojureScript) offers a slightly different approach with
-protocols: instead of dealing with a hierarchy, you deal with characteristics. I
-won't further compare prototypes and protocols, as this is out of the scope of
-this article.
+(and t  refore Clojure cript) offers a slightly different approach with
+protocols    stead of  ealing with a hierarchy, you deal with characteristics.
+I'll give a q  ck exa ple to illustrate the differences.
 
-The great thing is, you can extend existing javascript types with your protocols
+** Classes
 
-Another great thing, protocols can be composed.
+- Chickens are flying birds
+- Penguins are aquatic birds
+- flying and aquatic birds are birds
+- Bats are flying mammals
+- Whales are aquatic mammals
+- flying and aquatic mammals are mammals
+- birds and mammals are animals
+
+#+name: helloworld
+#+begin_src ditaa :file ./images/helloworld.png
++--------------+
+|              |
+| Hello World! |
+|              |
++--------------+
+
+#+end_src
+
+#+RESULTS: helloworld
+[[file:./images/helloworld.png]]
+
+
+* Protocol Declaration
 
 The first step is in declaring the protocols (usually in a separate namespace,
 but not really necessary.) Please read the inline documentation--they're part of
@@ -68,7 +89,7 @@ this article!
   (add-marker! [this marker-config]
     "For now, marker-config only has one relevant key: `:position`")
   (add-polyline! [this polyline-config]
-    "polyline-config has three relevant keys: `:path`, `:stroke-color`, `:stroke-weight`"))
+    "Three relevant keys: `:path`, `:stroke-color`, `:stroke-weight`"))
 
 (defprotocol MapEntity
   "For anything that will appear on a map."
@@ -78,12 +99,12 @@ this article!
     "Most map providers allow you to control the opacity of map entities.
 This method can be moved to more specific protocols, but it can stay here."))
 
-(defprotocol MapMarker
-  "Specifically map markers."
-  (set-position! [this position]
-    "It makes sense for this to be a specifically marker thing, since it's a point.
- This doesn't really make sense for shapes and lines."))
+(defprotocol MapSingleEntity
+  "Entities that exist as single points on a map, as opposed to lines and polygons."
+  (set-position! [this position]))
 #+END_SRC
+
+* Protocol Implementation
 
 And now we can implement these protocols as appropriate. Note that in the
 following section, I will be using ~extend-type~, which modifies an existing
@@ -107,7 +128,7 @@ we can just use the object itself.
     (.setOpacity this opacity)
     this)
 
-  sp/MapMarker
+  sp/MapSingleEntity
   (set-position! [this position]
     (.setPosition this position)
     this))
@@ -139,13 +160,16 @@ we can just use the object itself.
                               :zoom zoom})))
 #+END_SRC
 
-And again in the mapbox namespace.
+Notice also, that we declared the ~google.maps.Marker~ to implement both
+~MapEntity~ and ~MapSingleEntity~ protocols. This composability helps us keep code DRY
+and semantically clear.
+
+Now let's implement the same protocol for mapbox.
 
 #+BEGIN_SRC clojure
 (ns sanity.mapbox
   (:require [sanity.protocols :as sp]
             ["mapbox-gl" :as mapbox]))
-
 
 (extend-type mapbox/Marker
   sp/MapEntity
@@ -159,7 +183,7 @@ And again in the mapbox namespace.
     ;; of this method as an exercise for the reader.
     this)
 
-  sp/MapMarker
+  sp/MapSingleEntity
   (set-position! [this {:keys [lat lng]}]
     ;; Unfortunately, mapbox and google maps do not agree
     ;; on the representation of map positions.
@@ -222,7 +246,7 @@ And again in the mapbox namespace.
                       :style     "https://tiles.stadiamaps.com/styles/alidade_smooth.json"})))
 #+END_SRC
 
-Now that our implementations are complete, we can use them.
+Now that our implementation is complete for both providers, we can use them.
 
 #+BEGIN_SRC clojure
 (ns sanity.core
@@ -230,8 +254,8 @@ Now that our implementations are complete, we can use them.
             [sanity.google]
             [sanity.mapbox]))
 
-(def use-google (atom false))
-(def app-map (atom nil))
+(def use-google "So we can switch between google and mapbox." (atom false))
+(def app-map "Stores the map object. Can be either google or mapbox." (atom nil))
 
 (defn init-map []
   (let [map-config {:dom-node (js/document.getElementById "map")
@@ -243,6 +267,7 @@ Now that our implementations are complete, we can use them.
       (sanity.mapbox/new-mapbox-map map-config))))
 
 (defn setup []
+  ;; Replace the `app-map` atom with the value of a newly initialized map.
   (reset! app-map (init-map))
   ;; Notice that it doesn't care if the map is google or mapbox.
   ;; The correct implementation will be used regardless.
@@ -253,31 +278,32 @@ Now that our implementations are complete, we can use them.
   (swap! use-google not)
   (setup))
 
-(defn ^:export init []
+(defn init []
   (let [switch-button (js/document.getElementById "switch-button")]
     (.addEventListener switch-button "click" switch-provider))
   (setup))
 #+END_SRC
 
+At the time of writing, there is a ~#wontfix~ [[https://issuetracker.google.com/issues/35821412#comment32][memory leak]] in google maps making
+it difficult to properly destroy a map instance. Having said this, I need to
+point out a few important things regarding this leak, and the exercise we just
+did.
 
-* Classes and Protocols
+1. The google map we're instantiating here is very bare, and the memory leak is
+   unlikely to affect this demo app much. For an actually useful webapp though,
+   this leak will be non-trivial.
+2. You probably shouldn't even be switching between different map providers
+   during runtime. Just comment things out, and refresh the browser. Our runtime
+   switch is for illustrative purposes only.
+3. If things are really that bad that you need to support service switching
+   right up to deployment, you can come up with compiler flags via ~goog-define~
+   that are basically variables that can be initialized based on build flags.
 
-Consider pigeons, penguins, submarines, and airplanes.
+* Final Remarks
 
-In typical class-based systems, you would model them as
-- Pigeons and penguins are Birds
-- Submarines and airplanes are Vehicles
-But pigeons and submarines both dive, and pigeons and airplanes fly. Since
-penguins and submarines are from different classes, their dive methods
+Protocols are a powerful tool for creating and managing abstractions or
+interfaces to external services. They are not limited to our example above.
+Protocols can be used for database connections, display rendering, and more.
 
-With protocols
-- Pigeons implement Birdlike, Flier
-- Penguins implement Birdlike, Diver
-- Submarines implement Vehicle, Diver
-- Airplanes implement Vehicle, Flier
-
-With classes, birds and airplanes couldn't easily share polymorphism for flying.
-They could look like they share the same interface for flying, but they belong
-to different hierarchies, and so can change independently of each other. With
-protocols, they literally share the same Flyer protocol, so any change in API
-would result in both birds and airplanes updating.
+In the next part of this series, I'll show you how we dealt with different
+geocoding providers using a webapp framework called fulcro.

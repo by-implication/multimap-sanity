@@ -14,7 +14,7 @@
     ;; of this method as an exercise for the reader.
     this)
 
-  sp/MapMarker
+  sp/MapSingleEntity
   (set-position! [this {:keys [lat lng]}]
     ;; Unfortunately, mapbox and google maps do not agree
     ;; on the representation of map positions.
