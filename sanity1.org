@@ -95,10 +95,9 @@ systems of JavaScript and Java.
 
 * Protocol Declaration
 
-The first step is in declaring the protocols. Unless you plan on putting all
-your different implementations in the same namespace (and you shouldn't), you
-should keep your protocol declaration in its own namespace. Sort of like a
-header file in c++.
+The first step is in declaring the protocols. There are many ways of organizing
+protocols and namespaces, but I like separating protocol declaration from
+implementation. This is how I've structured the project below.
 
 Please read the inline documentation and comments--they're part of this article!
 
