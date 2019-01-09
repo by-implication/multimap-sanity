@@ -51,33 +51,56 @@ I'll give a quick example to illustrate the differences.
 
 ** Classes
 
-- Chickens are flying birds
-- Penguins are aquatic birds
-- flying and aquatic birds are birds
-- Bats are flying mammals
-- Whales are aquatic mammals
-- flying and aquatic mammals are mammals
-- birds and mammals are animals
+The following is a sample class hierarchy involving pigeons, penguins, bats, and whales.
 
-#+name: helloworld
-#+begin_src ditaa :file ./images/helloworld.png
-+--------------+
-|              |
-| Hello World! |
-|              |
-+--------------+
+- Animals
+  - Birds
+    - Flying Birds
+      - Pigeons
+    - Aquatic Birds
+      - Penguins
+  - Mammals
+    - Flying Mammals
+      - Bats
+    - Aquatic Mammals
+      - Whales
 
-#+end_src
+Because a class hierarchy is a tree, the sharing of attributes and methods
+outside of the parent-child relationship is, depending on the language, anywhere
+between complicated and impossible.
 
-#+RESULTS: helloworld
-[[file:./images/helloworld.png]]
+** Protocols
 
+In contrast, the same set of animals can be described in this way:
+
+- Pigeons (Flying, Avian)
+- Penguins (Aquatic, Avian)
+- Bats (Flying, Mammalian)
+- Whales (Aquatic, Mammalian)
+
+While the Flying protocol shared by pigeons and bats may declare a set of
+methods like ~fly~, ~land~, and ~maneuver~, implementation will be specific to
+pigeons and bats. (of course! they work differently.)
+
+Protocols lend themselves very well to composition, but sometimes it's harder to
+see structure. As the saying goes, use the right tool for the right job.
+
+#+CAPTION: Except for lisp. Lisp is always the right tool.
+https://imgs.xkcd.com/comics/lisp_cycles.png
+
+Kidding aside, the great thing about Clojure and ClojureScript being hosted
+languages is that you kind of get the best of both worlds. If the situation
+calls for it, you can always dig down into interop and use the respective class
+systems of JavaScript and Java.
 
 * Protocol Declaration
 
-The first step is in declaring the protocols (usually in a separate namespace,
-but not really necessary.) Please read the inline documentation--they're part of
-this article!
+The first step is in declaring the protocols. Unless you plan on putting all
+your different implementations in the same namespace (and you shouldn't), you
+should keep your protocol declaration in its own namespace. Sort of like a
+header file in c++.
+
+Please read the inline documentation and comments--they're part of this article!
 
 #+BEGIN_SRC clojure
 (ns sanity.protocols)
@@ -115,10 +138,21 @@ attached protocols. ~extend-type~ is not the only way to use protocols: there's
 store the native javascript object as a field in a ClojureScript data structure,
 we can just use the object itself.
 
+** Google Maps
+
+Let's declare a separate namespace
+
 #+BEGIN_SRC clojure
 (ns sanity.google
   (:require [sanity.protocols :as sp]))
+#+END_SRC
 
+And then extend the marker type. A marker is both a generic map entity, but it's
+also a single map entity representing a single point on the map.
+
+We are returning nil in ~destroy!~ because it should no longer exist.
+
+#+BEGIN_SRC clojure
 (extend-type js/google.maps.Marker
   sp/MapEntity
   (destroy! [this]
@@ -132,7 +166,13 @@ we can just use the object itself.
   (set-position! [this position]
     (.setPosition this position)
     this))
+#+END_SRC
 
+In contrast, the polyline does /not/ represent a single point, so
+~set-position!~ makes no sense. So, we only want to extend polyline with just
+the ~MapEntry~ protocol.
+
+#+BEGIN_SRC clojure
 (extend-type js/google.maps.Polyline
   sp/MapEntity
   (destroy! [this]
@@ -141,7 +181,13 @@ we can just use the object itself.
   (set-opacity! [this opacity]
     (.setOptions this #js {:strokeOpacity opacity})
     this))
+#+END_SRC
 
+Probably the most straightforward implementation here is ~get-dom-node~,
+effectively an alias for ~getDiv~. We go through this trouble because we want a
+consistent API for all maps we could possibly want to use.
+
+#+BEGIN_SRC clojure
 (extend-type js/google.maps.Map
   sp/MapLike
   (get-dom-node [this]
@@ -152,7 +198,14 @@ we can just use the object itself.
   (add-polyline! [this polyline-config]
     (js/google.maps.Polyline. (clj->js (assoc polyline-config
                                               :map this)))))
+#+END_SRC
 
+Finally, we explicitly define a ~new-google-map~ function to instantiate a...
+new google map. We could have named this as simply ~new-map~ to allow for
+consistency of this "constructor" function across the other services, but in
+this case it's important to be very clear about what it is you're constructing.
+
+#+BEGIN_SRC clojure
 (defn new-google-map [map-config]
   (let [{:keys [dom-node center zoom]} map-config]
     (js/google.maps.Map. dom-node
@@ -160,27 +213,32 @@ we can just use the object itself.
                               :zoom zoom})))
 #+END_SRC
 
-Notice also, that we declared the ~google.maps.Marker~ to implement both
-~MapEntity~ and ~MapSingleEntity~ protocols. This composability helps us keep code DRY
-and semantically clear.
+** Mapbox
 
-Now let's implement the same protocol for mapbox.
+Now let's implement the same protocol for mapbox. Notice that in our namespace
+declaration, ~mapbox-gl~ is in the require statement. Unlike google maps, mapbox
+exists as an npm library. Unfortunately, it's huge--it takes up about 23% the
+size of final sakay webapp artifact, (in contrast, ClojureScript takes up 17%,
+and the sakay-specific code is another 17%) but there's not much we can do about that.
 
 #+BEGIN_SRC clojure
 (ns sanity.mapbox
   (:require [sanity.protocols :as sp]
             ["mapbox-gl" :as mapbox]))
+#+END_SRC
 
+Mapbox markers are interesting. They're actually dom elements that are
+positioned relative to the map. So, to set the marker's opacity, we can just
+apply css styling. I'll leave the implementation of this method as an exercise
+for the reader.
+
+#+BEGIN_SRC clojure
 (extend-type mapbox/Marker
   sp/MapEntity
   (destroy! [this]
     (.remove this)
     nil)
   (set-opacity! [this opacity]
-    ;; Mapbox markers are interesting. They're actually dom elements
-    ;; that are positioned relative to the map. So, to set the marker's
-    ;; opacity, we can just apply css styling. I'll leave the implementation
-    ;; of this method as an exercise for the reader.
     this)
 
   sp/MapSingleEntity
@@ -189,11 +247,13 @@ Now let's implement the same protocol for mapbox.
     ;; on the representation of map positions.
     (.setLngLat this #js {:lon lng :lat lat})
     this))
+#+END_SRC
 
-;; Mapbox doesn't have polylines as a first-class entity.
-;; So we make a record that implements the appropriate protocols.
-;; You can think of records as clojure maps that have methods
-;; associated with them.
+Mapbox doesn't have polylines as a first-class entity, so we have to make a
+record that implements the appropriate protocols. You can think of records as
+clojure maps that have methods associated with them.
+
+#+BEGIN_SRC clojure
 (defrecord MapboxPolyline [street-map id]
   sp/MapEntity
   (destroy! [this]
@@ -203,7 +263,12 @@ Now let's implement the same protocol for mapbox.
       (.removeSource street-map id)))
   (set-opacity! [this opacity]
     (.setPaintProperty street-map id "line-opacity" opacity)))
+#+END_SRC
 
+And since polylines aren't a first-class entity, "constructing" it is a little
+different. Also notice the trivially simple implementation for ~get-dom-node~.
+
+#+BEGIN_SRC clojure
 (extend-type mapbox/Map
   sp/MapLike
   (get-dom-node [this]

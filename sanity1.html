@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-01-08 Tue 16:51 -->
+<!-- 2019-01-09 Wed 14:08 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Multiple Service Sanity with ClojureScript</title>
@@ -250,21 +250,27 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org513a271">1. Introduction</a></li>
-<li><a href="#org1267811">2. Protocols and Classes</a>
+<li><a href="#org9673155">1. Introduction</a></li>
+<li><a href="#orgf1a9205">2. Protocols and Classes</a>
 <ul>
-<li><a href="#org65b314d">2.1. Classes</a></li>
+<li><a href="#org97285dd">2.1. Classes</a></li>
+<li><a href="#org6d0f514">2.2. Protocols</a></li>
 </ul>
 </li>
-<li><a href="#orgaa5828a">3. Protocol Declaration</a></li>
-<li><a href="#orge1d38d3">4. Protocol Implementation</a></li>
-<li><a href="#org4bfe390">5. Final Remarks</a></li>
+<li><a href="#orgdbbc06e">3. Protocol Declaration</a></li>
+<li><a href="#org961745d">4. Protocol Implementation</a>
+<ul>
+<li><a href="#org1dd6f41">4.1. Google Maps</a></li>
+<li><a href="#orgebd4365">4.2. Mapbox</a></li>
+</ul>
+</li>
+<li><a href="#orgc7ee92c">5. Final Remarks</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org513a271" class="outline-2">
-<h2 id="org513a271"><span class="section-number-2">1</span> Introduction</h2>
+<div id="outline-container-org9673155" class="outline-2">
+<h2 id="org9673155"><span class="section-number-2">1</span> Introduction</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 In early 2018, google announced a change in the pricing of their maps services,
@@ -320,8 +326,8 @@ geocoding, that's for the next post in the series.
 </div>
 </div>
 
-<div id="outline-container-org1267811" class="outline-2">
-<h2 id="org1267811"><span class="section-number-2">2</span> Protocols and Classes</h2>
+<div id="outline-container-orgf1a9205" class="outline-2">
+<h2 id="orgf1a9205"><span class="section-number-2">2</span> Protocols and Classes</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Modern mapping libraries have roughly the same features. Beyond displaying the
@@ -332,42 +338,109 @@ consistent, their APIs vary greatly across alternatives.
 
 <p>
 Javascript's prototypes and classes may help bring sanity to this, but Clojure
-(and therefore ClojureScript) offers a slightly different approach with
-protocols: instead of dealing with a hierarchy, you deal with characteristics.
+(and therefore Clojure cript) offers a slightly different approach with
+protocols. Instead of dealing with a hierarchy, you deal with characteristics.
 I'll give a quick example to illustrate the differences.
 </p>
 </div>
 
-<div id="outline-container-org65b314d" class="outline-3">
-<h3 id="org65b314d"><span class="section-number-3">2.1</span> Classes</h3>
+<div id="outline-container-org97285dd" class="outline-3">
+<h3 id="org97285dd"><span class="section-number-3">2.1</span> Classes</h3>
 <div class="outline-text-3" id="text-2-1">
+<p>
+The following is a sample class hierarchy involving pigeons, penguins, bats, and whales.
+</p>
+
 <ul class="org-ul">
-<li>Chickens are flying birds</li>
-<li>Penguins are aquatic birds</li>
-<li>flying and aquatic birds are birds</li>
-<li>Bats are flying mammals</li>
-<li>Whales are aquatic mammals</li>
-<li>flying and aquatic mammals are mammals</li>
-<li>birds and mammals are animals</li>
+<li>Animals
+<ul class="org-ul">
+<li>Birds
+<ul class="org-ul">
+<li>Flying Birds
+<ul class="org-ul">
+<li>Pigeons</li>
+</ul></li>
+<li>Aquatic Birds
+<ul class="org-ul">
+<li>Penguins</li>
+</ul></li>
+</ul></li>
+<li>Mammals
+<ul class="org-ul">
+<li>Flying Mammals
+<ul class="org-ul">
+<li>Bats</li>
+</ul></li>
+<li>Aquatic Mammals
+<ul class="org-ul">
+<li>Whales</li>
+</ul></li>
+</ul></li>
+</ul></li>
 </ul>
+
+<p>
+Because a class hierarchy is a tree, the sharing of attributes and methods
+outside of the parent-child relationship is, depending on the language, anywhere
+between complicated and impossible.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6d0f514" class="outline-3">
+<h3 id="org6d0f514"><span class="section-number-3">2.2</span> Protocols</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+In contrast, the same set of animals can be described in this way:
+</p>
+
+<ul class="org-ul">
+<li>Pigeons (Flying, Avian)</li>
+<li>Penguins (Aquatic, Avian)</li>
+<li>Bats (Flying, Mammalian)</li>
+<li>Whales (Aquatic, Mammalian)</li>
+</ul>
+
+<p>
+While the Flying protocol shared by pigeons and bats may declare a set of
+methods like <code>fly</code>, <code>land</code>, and <code>maneuver</code>, implementation will be specific to
+pigeons and bats. (of course! they work differently.)
+</p>
+
+<p>
+Protocols lend themselves very well to composition, but sometimes it's harder to
+see structure. As the saying goes, use the right tool for the right job.
+</p>
 
 
 <div class="figure">
-<p><img src="./images/helloworld.png" alt="helloworld.png" />
+<p><img src="https://imgs.xkcd.com/comics/lisp_cycles.png" alt="lisp_cycles.png" />
+</p>
+<p><span class="figure-number">Figure 2: </span>Except for lisp. Lisp is always the right tool.</p>
+</div>
+
+<p>
+Kidding aside, the great thing about Clojure and ClojureScript being hosted
+languages is that you kind of get the best of both worlds. If the situation
+calls for it, you can always dig down into interop and use the respective class
+systems of JavaScript and Java.
 </p>
 </div>
 </div>
 </div>
-</div>
 
-
-<div id="outline-container-orgaa5828a" class="outline-2">
-<h2 id="orgaa5828a"><span class="section-number-2">3</span> Protocol Declaration</h2>
+<div id="outline-container-orgdbbc06e" class="outline-2">
+<h2 id="orgdbbc06e"><span class="section-number-2">3</span> Protocol Declaration</h2>
 <div class="outline-text-2" id="text-3">
 <p>
-The first step is in declaring the protocols (usually in a separate namespace,
-but not really necessary.) Please read the inline documentation&#x2013;they're part of
-this article!
+The first step is in declaring the protocols. Unless you plan on putting all
+your different implementations in the same namespace (and you shouldn't), you
+should keep your protocol declaration in its own namespace. Sort of like a
+header file in c++.
+</p>
+
+<p>
+Please read the inline documentation and comments&#x2013;they're part of this article!
 </p>
 
 <div class="org-src-container">
@@ -398,8 +471,8 @@ this article!
 </div>
 </div>
 
-<div id="outline-container-orge1d38d3" class="outline-2">
-<h2 id="orge1d38d3"><span class="section-number-2">4</span> Protocol Implementation</h2>
+<div id="outline-container-org961745d" class="outline-2">
+<h2 id="org961745d"><span class="section-number-2">4</span> Protocol Implementation</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 And now we can implement these protocols as appropriate. Note that in the
@@ -411,12 +484,32 @@ attached protocols. <code>extend-type</code> is not the only way to use protocol
 store the native javascript object as a field in a ClojureScript data structure,
 we can just use the object itself.
 </p>
+</div>
+
+<div id="outline-container-org1dd6f41" class="outline-3">
+<h3 id="org1dd6f41"><span class="section-number-3">4.1</span> Google Maps</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+Let's declare a separate namespace
+</p>
 
 <div class="org-src-container">
 <pre class="src src-clojure"><span style="color: #51afef;">(</span><span style="color: #51afef;">ns</span> <span style="color: #ECBE7B;">sanity.google</span>
   <span style="color: #c678dd;">(</span><span style="color: #a9a1e1;">:require</span> <span style="color: #98be65;">[</span>sanity.protocols <span style="color: #a9a1e1;">:as</span> sp<span style="color: #98be65;">]</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+</pre>
+</div>
 
-<span style="color: #51afef;">(</span>extend-type <span style="color: #ECBE7B;">js</span>/google.maps.Marker
+<p>
+And then extend the marker type. A marker is both a generic map entity, but it's
+also a single map entity representing a single point on the map.
+</p>
+
+<p>
+We are returning nil in <code>destroy!</code> because it should no longer exist.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-clojure"><span style="color: #51afef;">(</span>extend-type <span style="color: #ECBE7B;">js</span>/google.maps.Marker
   <span style="color: #ECBE7B;">sp</span>/MapEntity
   <span style="color: #c678dd;">(</span>destroy! <span style="color: #98be65;">[</span>this<span style="color: #98be65;">]</span>
     <span style="color: #98be65;">(</span>.setMap this <span style="color: #a9a1e1;">nil</span><span style="color: #98be65;">)</span>
@@ -429,8 +522,17 @@ we can just use the object itself.
   <span style="color: #c678dd;">(</span>set-position! <span style="color: #98be65;">[</span>this position<span style="color: #98be65;">]</span>
     <span style="color: #98be65;">(</span>.setPosition this position<span style="color: #98be65;">)</span>
     this<span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+</pre>
+</div>
 
-<span style="color: #51afef;">(</span>extend-type <span style="color: #ECBE7B;">js</span>/google.maps.Polyline
+<p>
+In contrast, the polyline does <i>not</i> represent a single point, so
+<code>set-position!</code> makes no sense. So, we only want to extend polyline with just
+the <code>MapEntry</code> protocol.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-clojure"><span style="color: #51afef;">(</span>extend-type <span style="color: #ECBE7B;">js</span>/google.maps.Polyline
   <span style="color: #ECBE7B;">sp</span>/MapEntity
   <span style="color: #c678dd;">(</span>destroy! <span style="color: #98be65;">[</span>this<span style="color: #98be65;">]</span>
     <span style="color: #98be65;">(</span>.setMap this <span style="color: #a9a1e1;">nil</span><span style="color: #98be65;">)</span>
@@ -438,8 +540,17 @@ we can just use the object itself.
   <span style="color: #c678dd;">(</span>set-opacity! <span style="color: #98be65;">[</span>this opacity<span style="color: #98be65;">]</span>
     <span style="color: #98be65;">(</span>.setOptions this #js <span style="color: #51afef;">{</span><span style="color: #a9a1e1;">:strokeOpacity</span> opacity<span style="color: #51afef;">}</span><span style="color: #98be65;">)</span>
     this<span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+</pre>
+</div>
 
-<span style="color: #51afef;">(</span>extend-type <span style="color: #ECBE7B;">js</span>/google.maps.Map
+<p>
+Probably the most straightforward implementation here is <code>get-dom-node</code>,
+effectively an alias for <code>getDiv</code>. We go through this trouble because we want a
+consistent API for all maps we could possibly want to use.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-clojure"><span style="color: #51afef;">(</span>extend-type <span style="color: #ECBE7B;">js</span>/google.maps.Map
   <span style="color: #ECBE7B;">sp</span>/MapLike
   <span style="color: #c678dd;">(</span>get-dom-node <span style="color: #98be65;">[</span>this<span style="color: #98be65;">]</span>
     <span style="color: #98be65;">(</span>.getDiv this<span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span>
@@ -449,40 +560,59 @@ we can just use the object itself.
   <span style="color: #c678dd;">(</span>add-polyline! <span style="color: #98be65;">[</span>this polyline-config<span style="color: #98be65;">]</span>
     <span style="color: #98be65;">(</span><span style="color: #ECBE7B;">js</span>/google.maps.Polyline. <span style="color: #51afef;">(</span>clj-&gt;js <span style="color: #c678dd;">(</span>assoc polyline-config
                                               <span style="color: #a9a1e1;">:map</span> this<span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span><span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+</pre>
+</div>
 
-<span style="color: #51afef;">(</span><span style="color: #51afef;">defn</span> <span style="color: #c678dd;">new-google-map</span> <span style="color: #c678dd;">[</span>map-config<span style="color: #c678dd;">]</span>
+<p>
+Finally, we explicitly define a <code>new-google-map</code> function to instantiate a&#x2026;
+new google map. We could have named this as simply <code>new-map</code> to allow for
+consistency of this "constructor" function across the other services, but in
+this case it's important to be very clear about what it is you're constructing.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-clojure"><span style="color: #51afef;">(</span><span style="color: #51afef;">defn</span> <span style="color: #c678dd;">new-google-map</span> <span style="color: #c678dd;">[</span>map-config<span style="color: #c678dd;">]</span>
   <span style="color: #c678dd;">(</span><span style="color: #51afef;">let</span> <span style="color: #98be65;">[</span><span style="color: #51afef;">{</span><span style="color: #a9a1e1;">:keys</span> <span style="color: #c678dd;">[</span>dom-node center zoom<span style="color: #c678dd;">]</span><span style="color: #51afef;">}</span> map-config<span style="color: #98be65;">]</span>
     <span style="color: #98be65;">(</span><span style="color: #ECBE7B;">js</span>/google.maps.Map. dom-node
                          #js <span style="color: #51afef;">{</span><span style="color: #a9a1e1;">:center</span> <span style="color: #c678dd;">(</span>clj-&gt;js center<span style="color: #c678dd;">)</span>
                               <span style="color: #a9a1e1;">:zoom</span> zoom<span style="color: #51afef;">}</span><span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
 </pre>
 </div>
+</div>
+</div>
 
+<div id="outline-container-orgebd4365" class="outline-3">
+<h3 id="orgebd4365"><span class="section-number-3">4.2</span> Mapbox</h3>
+<div class="outline-text-3" id="text-4-2">
 <p>
-Notice also, that we declared the <code>google.maps.Marker</code> to implement both
-<code>MapEntity</code> and <code>MapSingleEntity</code> protocols. This composability helps us keep code DRY
-and semantically clear.
-</p>
-
-<p>
-Now let's implement the same protocol for mapbox.
+Now let's implement the same protocol for mapbox. Notice that in our namespace
+declaration, <code>mapbox-gl</code> is in the require statement. Unlike google maps, mapbox
+exists as an npm library. Unfortunately, it's huge&#x2013;it takes up about 23% the
+size of final sakay webapp artifact, (in contrast, ClojureScript takes up 17%,
+and the sakay-specific code is another 17%) but there's not much we can do about that.
 </p>
 
 <div class="org-src-container">
 <pre class="src src-clojure"><span style="color: #51afef;">(</span><span style="color: #51afef;">ns</span> <span style="color: #ECBE7B;">sanity.mapbox</span>
   <span style="color: #c678dd;">(</span><span style="color: #a9a1e1;">:require</span> <span style="color: #98be65;">[</span>sanity.protocols <span style="color: #a9a1e1;">:as</span> sp<span style="color: #98be65;">]</span>
             <span style="color: #98be65;">[</span><span style="color: #98be65;">"mapbox-gl"</span> <span style="color: #a9a1e1;">:as</span> mapbox<span style="color: #98be65;">]</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+</pre>
+</div>
 
-<span style="color: #51afef;">(</span>extend-type <span style="color: #ECBE7B;">mapbox</span>/Marker
+<p>
+Mapbox markers are interesting. They're actually dom elements that are
+positioned relative to the map. So, to set the marker's opacity, we can just
+apply css styling. I'll leave the implementation of this method as an exercise
+for the reader.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-clojure"><span style="color: #51afef;">(</span>extend-type <span style="color: #ECBE7B;">mapbox</span>/Marker
   <span style="color: #ECBE7B;">sp</span>/MapEntity
   <span style="color: #c678dd;">(</span>destroy! <span style="color: #98be65;">[</span>this<span style="color: #98be65;">]</span>
     <span style="color: #98be65;">(</span>.remove this<span style="color: #98be65;">)</span>
     <span style="color: #a9a1e1;">nil</span><span style="color: #c678dd;">)</span>
   <span style="color: #c678dd;">(</span>set-opacity! <span style="color: #98be65;">[</span>this opacity<span style="color: #98be65;">]</span>
-    <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">Mapbox markers are interesting. They're actually dom elements</span>
-    <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">that are positioned relative to the map. So, to set the marker's</span>
-    <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">opacity, we can just apply css styling. I'll leave the implementation</span>
-    <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">of this method as an exercise for the reader.</span>
     this<span style="color: #c678dd;">)</span>
 
   <span style="color: #ECBE7B;">sp</span>/MapSingleEntity
@@ -491,12 +621,17 @@ Now let's implement the same protocol for mapbox.
     <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">on the representation of map positions.</span>
     <span style="color: #98be65;">(</span>.setLngLat this #js <span style="color: #51afef;">{</span><span style="color: #a9a1e1;">:lon</span> lng <span style="color: #a9a1e1;">:lat</span> lat<span style="color: #51afef;">}</span><span style="color: #98be65;">)</span>
     this<span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+</pre>
+</div>
 
-<span style="color: #5B6268;">;; </span><span style="color: #5B6268;">Mapbox doesn't have polylines as a first-class entity.</span>
-<span style="color: #5B6268;">;; </span><span style="color: #5B6268;">So we make a record that implements the appropriate protocols.</span>
-<span style="color: #5B6268;">;; </span><span style="color: #5B6268;">You can think of records as clojure maps that have methods</span>
-<span style="color: #5B6268;">;; </span><span style="color: #5B6268;">associated with them.</span>
-<span style="color: #51afef;">(</span><span style="color: #51afef;">defrecord</span> <span style="color: #ECBE7B;">MapboxPolyline</span> <span style="color: #c678dd;">[</span>street-map id<span style="color: #c678dd;">]</span>
+<p>
+Mapbox doesn't have polylines as a first-class entity, so we have to make a
+record that implements the appropriate protocols. You can think of records as
+clojure maps that have methods associated with them.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-clojure"><span style="color: #51afef;">(</span><span style="color: #51afef;">defrecord</span> <span style="color: #ECBE7B;">MapboxPolyline</span> <span style="color: #c678dd;">[</span>street-map id<span style="color: #c678dd;">]</span>
   <span style="color: #ECBE7B;">sp</span>/MapEntity
   <span style="color: #c678dd;">(</span>destroy! <span style="color: #98be65;">[</span>this<span style="color: #98be65;">]</span>
     <span style="color: #98be65;">(</span><span style="color: #51afef;">when</span> <span style="color: #51afef;">(</span>.getLayer street-map id<span style="color: #51afef;">)</span>
@@ -505,8 +640,16 @@ Now let's implement the same protocol for mapbox.
       <span style="color: #51afef;">(</span>.removeSource street-map id<span style="color: #51afef;">)</span><span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span>
   <span style="color: #c678dd;">(</span>set-opacity! <span style="color: #98be65;">[</span>this opacity<span style="color: #98be65;">]</span>
     <span style="color: #98be65;">(</span>.setPaintProperty street-map id <span style="color: #98be65;">"line-opacity"</span> opacity<span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+</pre>
+</div>
 
-<span style="color: #51afef;">(</span>extend-type <span style="color: #ECBE7B;">mapbox</span>/Map
+<p>
+And since polylines aren't a first-class entity, "constructing" it is a little
+different. Also notice the trivially simple implementation for <code>get-dom-node</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-clojure"><span style="color: #51afef;">(</span>extend-type <span style="color: #ECBE7B;">mapbox</span>/Map
   <span style="color: #ECBE7B;">sp</span>/MapLike
   <span style="color: #c678dd;">(</span>get-dom-node <span style="color: #98be65;">[</span>this<span style="color: #98be65;">]</span>
     <span style="color: #98be65;">(</span>.getContainer this<span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span>
@@ -610,9 +753,10 @@ that are basically variables that can be initialized based on build flags.</li>
 </ol>
 </div>
 </div>
+</div>
 
-<div id="outline-container-org4bfe390" class="outline-2">
-<h2 id="org4bfe390"><span class="section-number-2">5</span> Final Remarks</h2>
+<div id="outline-container-orgc7ee92c" class="outline-2">
+<h2 id="orgc7ee92c"><span class="section-number-2">5</span> Final Remarks</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 Protocols are a powerful tool for creating and managing abstractions or
@@ -629,7 +773,7 @@ geocoding providers using a webapp framework called fulcro.
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Levi Tan Ong</p>
-<p class="date">Created: 2019-01-08 Tue 16:51</p>
+<p class="date">Created: 2019-01-09 Wed 14:08</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
