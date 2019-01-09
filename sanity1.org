@@ -45,9 +45,9 @@ control what part of the map is shown. While these features are relatively
 consistent, their APIs vary greatly across alternatives.
 
 Javascript's prototypes and classes may help bring sanity to this, but Clojure
-(and t  refore Clojure cript) offers a slightly different approach with
-protocols    stead of  ealing with a hierarchy, you deal with characteristics.
-I'll give a q  ck exa ple to illustrate the differences.
+(and therefore Clojure cript) offers a slightly different approach with
+protocols. Instead of dealing with a hierarchy, you deal with characteristics.
+I'll give a quick example to illustrate the differences.
 
 ** Classes
 
