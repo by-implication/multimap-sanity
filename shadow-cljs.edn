@@ -1,9 +1,10 @@
 {:dependencies [[binaryage/devtools "0.9.10"]]
  :source-paths ["src"]
  :builds
- {:app {:target :browser
+ {:app {:target     :browser
         :output-dir "resources/public/js"
         :asset-path "/js"
-        :modules {:main {:entries [sanity.core]}}
-        :devtools {:http-root "resources/public"
-                   :http-port 8080}}}}
+        :modules    {:main {:entries [sanity.core]}}
+        :devtools   {:http-root "resources/public"
+                     :http-port 8080}
+        :release    {:output-dir "docs/js"}}}}

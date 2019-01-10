@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Multimap Sanity</title>
+    <link rel="stylesheet" href="css/mapbox-gl.css">
+    <style type="text/css" media="screen">
+      #map {
+          height: 512px;
+          width: 512px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div>
+      <button id="switch-button">Switch</button>
+    </div>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCLQe8bRyfJrtVkt6jRdtQT6CZlAmULaiY">
+    </script>
+    <script type="text/javascript" src="js/main.js"></script>
+    <script type="text/javascript">
+      sanity.core.init();
+    </script>
+  </body>
+</html>
