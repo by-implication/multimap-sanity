@@ -98,7 +98,7 @@ https://imgs.xkcd.com/comics/lisp_cycles.png
 Kidding aside, the great thing about Clojure and ClojureScript being hosted
 languages is that you kind of get the best of both worlds. If the situation
 calls for it, you can always dig down into interop and use the respective class
-systems of JavaScript and Java.
+systems of Java and JavaScript.
 
 * Protocol Declaration
 
@@ -378,5 +378,3 @@ Protocols can be used for database connections, display rendering, and more.
 
 In the next part of this series, I'll show you how we dealt with different
 geocoding providers using a webapp framework called fulcro.
-
-Below is a working sample of the code we worked on:

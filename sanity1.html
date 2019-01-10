@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-01-10 Thu 15:43 -->
+<!-- 2019-01-10 Thu 16:04 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Multiple Service Sanity with ClojureScript</title>
@@ -250,27 +250,27 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgc4acce2">1. Introduction</a></li>
-<li><a href="#org8ac2e6a">2. Protocols and Classes</a>
+<li><a href="#org8ff92a4">1. Introduction</a></li>
+<li><a href="#org6ce5fcb">2. Protocols and Classes</a>
 <ul>
-<li><a href="#org211d448">2.1. Classes</a></li>
-<li><a href="#orgdef3b67">2.2. Protocols</a></li>
+<li><a href="#org8e8e333">2.1. Classes</a></li>
+<li><a href="#org1b9879d">2.2. Protocols</a></li>
 </ul>
 </li>
-<li><a href="#orgc1d7bae">3. Protocol Declaration</a></li>
-<li><a href="#orgf8be80c">4. Protocol Implementation</a>
+<li><a href="#orgd5dfb3f">3. Protocol Declaration</a></li>
+<li><a href="#org49377cb">4. Protocol Implementation</a>
 <ul>
-<li><a href="#org5067e8c">4.1. Google Maps</a></li>
-<li><a href="#org4da2818">4.2. Mapbox</a></li>
+<li><a href="#org5a533cd">4.1. Google Maps</a></li>
+<li><a href="#orgde9e44f">4.2. Mapbox</a></li>
 </ul>
 </li>
-<li><a href="#orgaa6f500">5. Final Remarks</a></li>
+<li><a href="#orge88fc5d">5. Final Remarks</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgc4acce2" class="outline-2">
-<h2 id="orgc4acce2"><span class="section-number-2">1</span> Introduction</h2>
+<div id="outline-container-org8ff92a4" class="outline-2">
+<h2 id="org8ff92a4"><span class="section-number-2">1</span> Introduction</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 In early 2018, google announced a change in the pricing of their maps services,
@@ -329,12 +329,12 @@ We'll be making a very simple toy that switches between two mapping services
 during runtime:
 </p>
 
-<iframe style="width: 512px; height: 580px"= src="https://by-implication.github.io/multimap-sanity/";></iframe>
+<iframe style="width: 512px; height: 548px"= src="https://by-implication.github.io/multimap-sanity/";></iframe>
 </div>
 </div>
 
-<div id="outline-container-org8ac2e6a" class="outline-2">
-<h2 id="org8ac2e6a"><span class="section-number-2">2</span> Protocols and Classes</h2>
+<div id="outline-container-org6ce5fcb" class="outline-2">
+<h2 id="org6ce5fcb"><span class="section-number-2">2</span> Protocols and Classes</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Modern mapping libraries have roughly the same features. Beyond displaying the
@@ -351,8 +351,8 @@ I'll give a quick example to illustrate the differences.
 </p>
 </div>
 
-<div id="outline-container-org211d448" class="outline-3">
-<h3 id="org211d448"><span class="section-number-3">2.1</span> Classes</h3>
+<div id="outline-container-org8e8e333" class="outline-3">
+<h3 id="org8e8e333"><span class="section-number-3">2.1</span> Classes</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 The following is a sample class hierarchy involving pigeons, penguins, bats, and whales.
@@ -394,8 +394,8 @@ between complicated and impossible.
 </div>
 </div>
 
-<div id="outline-container-orgdef3b67" class="outline-3">
-<h3 id="orgdef3b67"><span class="section-number-3">2.2</span> Protocols</h3>
+<div id="outline-container-org1b9879d" class="outline-3">
+<h3 id="org1b9879d"><span class="section-number-3">2.2</span> Protocols</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 In contrast, the same set of animals can be described in this way:
@@ -430,14 +430,14 @@ see structure. As the saying goes, use the right tool for the right job.
 Kidding aside, the great thing about Clojure and ClojureScript being hosted
 languages is that you kind of get the best of both worlds. If the situation
 calls for it, you can always dig down into interop and use the respective class
-systems of JavaScript and Java.
+systems of Java and JavaScript.
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgc1d7bae" class="outline-2">
-<h2 id="orgc1d7bae"><span class="section-number-2">3</span> Protocol Declaration</h2>
+<div id="outline-container-orgd5dfb3f" class="outline-2">
+<h2 id="orgd5dfb3f"><span class="section-number-2">3</span> Protocol Declaration</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 The first step is in declaring the protocols. There are many ways of organizing
@@ -477,8 +477,8 @@ Please read the inline documentation and comments&#x2013;they're part of this ar
 </div>
 </div>
 
-<div id="outline-container-orgf8be80c" class="outline-2">
-<h2 id="orgf8be80c"><span class="section-number-2">4</span> Protocol Implementation</h2>
+<div id="outline-container-org49377cb" class="outline-2">
+<h2 id="org49377cb"><span class="section-number-2">4</span> Protocol Implementation</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 And now we can implement these protocols as appropriate. Note that in the
@@ -492,8 +492,8 @@ we can just use the object itself.
 </p>
 </div>
 
-<div id="outline-container-org5067e8c" class="outline-3">
-<h3 id="org5067e8c"><span class="section-number-3">4.1</span> Google Maps</h3>
+<div id="outline-container-org5a533cd" class="outline-3">
+<h3 id="org5a533cd"><span class="section-number-3">4.1</span> Google Maps</h3>
 <div class="outline-text-3" id="text-4-1">
 <p>
 Let's declare a separate namespace
@@ -587,8 +587,8 @@ this case it's important to be very clear about what it is you're constructing.
 </div>
 </div>
 
-<div id="outline-container-org4da2818" class="outline-3">
-<h3 id="org4da2818"><span class="section-number-3">4.2</span> Mapbox</h3>
+<div id="outline-container-orgde9e44f" class="outline-3">
+<h3 id="orgde9e44f"><span class="section-number-3">4.2</span> Mapbox</h3>
 <div class="outline-text-3" id="text-4-2">
 <p>
 Now let's implement the same protocol for mapbox. Notice that in our namespace
@@ -761,8 +761,8 @@ that are basically variables that can be initialized based on build flags.</li>
 </div>
 </div>
 
-<div id="outline-container-orgaa6f500" class="outline-2">
-<h2 id="orgaa6f500"><span class="section-number-2">5</span> Final Remarks</h2>
+<div id="outline-container-orge88fc5d" class="outline-2">
+<h2 id="orge88fc5d"><span class="section-number-2">5</span> Final Remarks</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 Protocols are a powerful tool for creating and managing abstractions or
@@ -774,16 +774,12 @@ Protocols can be used for database connections, display rendering, and more.
 In the next part of this series, I'll show you how we dealt with different
 geocoding providers using a webapp framework called fulcro.
 </p>
-
-<p>
-Below is a working sample of the code we worked on:
-</p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Levi Tan Ong</p>
-<p class="date">Created: 2019-01-10 Thu 15:43</p>
+<p class="date">Created: 2019-01-10 Thu 16:04</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
