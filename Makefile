@@ -1,7 +1,8 @@
 release: build-cljs
-	git add ./docs
+	emacs --eval "(progn (require 'org) (org-html-export-to-html))" --kill
+	cp sanity1.html docs
+	git add --all
 	git commit -m "release"
-	git push origin master
 
 copy-files:
 	cp -r resources/public/ docs/
