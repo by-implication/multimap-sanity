@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-01-10 Thu 16:21 -->
+<!-- 2019-01-10 Thu 16:23 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Multiple Service Sanity with ClojureScript</title>
@@ -250,27 +250,27 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org11c7829">1. Introduction</a></li>
-<li><a href="#orgfa4d467">2. Protocols and Classes</a>
+<li><a href="#org03e6c3e">1. Introduction</a></li>
+<li><a href="#org449f779">2. Protocols and Classes</a>
 <ul>
-<li><a href="#org27725e8">2.1. Classes</a></li>
-<li><a href="#org92b891d">2.2. Protocols</a></li>
+<li><a href="#orgee537a2">2.1. Classes</a></li>
+<li><a href="#orgece7fe5">2.2. Protocols</a></li>
 </ul>
 </li>
-<li><a href="#orgeac4d17">3. Protocol Declaration</a></li>
-<li><a href="#org99f98a0">4. Protocol Implementation</a>
+<li><a href="#org0df85db">3. Protocol Declaration</a></li>
+<li><a href="#orge6bba73">4. Protocol Implementation</a>
 <ul>
-<li><a href="#org24e5dc5">4.1. Google Maps</a></li>
-<li><a href="#org72fa240">4.2. Mapbox</a></li>
+<li><a href="#org09a4eb0">4.1. Google Maps</a></li>
+<li><a href="#org8fa3651">4.2. Mapbox</a></li>
 </ul>
 </li>
-<li><a href="#org041b96f">5. Final Remarks</a></li>
+<li><a href="#orgd8cdba5">5. Final Remarks</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org11c7829" class="outline-2">
-<h2 id="org11c7829"><span class="section-number-2">1</span> Introduction</h2>
+<div id="outline-container-org03e6c3e" class="outline-2">
+<h2 id="org03e6c3e"><span class="section-number-2">1</span> Introduction</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 In early 2018, google announced a change in the pricing of their maps services,
@@ -333,8 +333,8 @@ during runtime:
 </div>
 </div>
 
-<div id="outline-container-orgfa4d467" class="outline-2">
-<h2 id="orgfa4d467"><span class="section-number-2">2</span> Protocols and Classes</h2>
+<div id="outline-container-org449f779" class="outline-2">
+<h2 id="org449f779"><span class="section-number-2">2</span> Protocols and Classes</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Modern mapping libraries have roughly the same features. Beyond displaying the
@@ -351,8 +351,8 @@ I'll give a quick example to illustrate the differences.
 </p>
 </div>
 
-<div id="outline-container-org27725e8" class="outline-3">
-<h3 id="org27725e8"><span class="section-number-3">2.1</span> Classes</h3>
+<div id="outline-container-orgee537a2" class="outline-3">
+<h3 id="orgee537a2"><span class="section-number-3">2.1</span> Classes</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 The following is a sample class hierarchy involving pigeons, penguins, bats, and whales.
@@ -394,8 +394,8 @@ between complicated and impossible.
 </div>
 </div>
 
-<div id="outline-container-org92b891d" class="outline-3">
-<h3 id="org92b891d"><span class="section-number-3">2.2</span> Protocols</h3>
+<div id="outline-container-orgece7fe5" class="outline-3">
+<h3 id="orgece7fe5"><span class="section-number-3">2.2</span> Protocols</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 In contrast, the same set of animals can be described in this way:
@@ -436,8 +436,8 @@ systems of Java and JavaScript.
 </div>
 </div>
 
-<div id="outline-container-orgeac4d17" class="outline-2">
-<h2 id="orgeac4d17"><span class="section-number-2">3</span> Protocol Declaration</h2>
+<div id="outline-container-org0df85db" class="outline-2">
+<h2 id="org0df85db"><span class="section-number-2">3</span> Protocol Declaration</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 The first step is in declaring the protocols. There are many ways of organizing
@@ -477,8 +477,8 @@ Please read the inline documentation and comments&#x2013;they're part of this ar
 </div>
 </div>
 
-<div id="outline-container-org99f98a0" class="outline-2">
-<h2 id="org99f98a0"><span class="section-number-2">4</span> Protocol Implementation</h2>
+<div id="outline-container-orge6bba73" class="outline-2">
+<h2 id="orge6bba73"><span class="section-number-2">4</span> Protocol Implementation</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 And now we can implement these protocols as appropriate. Note that in the
@@ -492,8 +492,8 @@ we can just use the object itself.
 </p>
 </div>
 
-<div id="outline-container-org24e5dc5" class="outline-3">
-<h3 id="org24e5dc5"><span class="section-number-3">4.1</span> Google Maps</h3>
+<div id="outline-container-org09a4eb0" class="outline-3">
+<h3 id="org09a4eb0"><span class="section-number-3">4.1</span> Google Maps</h3>
 <div class="outline-text-3" id="text-4-1">
 <p>
 Let's declare a separate namespace
@@ -587,8 +587,8 @@ this case it's important to be very clear about what it is you're constructing.
 </div>
 </div>
 
-<div id="outline-container-org72fa240" class="outline-3">
-<h3 id="org72fa240"><span class="section-number-3">4.2</span> Mapbox</h3>
+<div id="outline-container-org8fa3651" class="outline-3">
+<h3 id="org8fa3651"><span class="section-number-3">4.2</span> Mapbox</h3>
 <div class="outline-text-3" id="text-4-2">
 <p>
 Now let's implement the same protocol for mapbox. Notice that in our namespace
@@ -761,8 +761,8 @@ that are basically variables that can be initialized based on build flags.</li>
 </div>
 </div>
 
-<div id="outline-container-org041b96f" class="outline-2">
-<h2 id="org041b96f"><span class="section-number-2">5</span> Final Remarks</h2>
+<div id="outline-container-orgd8cdba5" class="outline-2">
+<h2 id="orgd8cdba5"><span class="section-number-2">5</span> Final Remarks</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 Protocols are a powerful tool for creating and managing abstractions or
@@ -785,7 +785,7 @@ Finally, here is the working sample again, for your reference:
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Levi Tan Ong</p>
-<p class="date">Created: 2019-01-10 Thu 16:21</p>
+<p class="date">Created: 2019-01-10 Thu 16:23</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
