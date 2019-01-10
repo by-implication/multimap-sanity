@@ -37,6 +37,13 @@ on the map because it's "read only". Information only flows from the app state
 into the map, and not the other way around. As for forward and reverse
 geocoding, that's for the next post in the series.
 
+We'll be making a very simple toy that switches between two mapping services
+during runtime:
+
+#+BEGIN_EXPORT html
+<iframe style="width: 512px; height: 540px"= src="https://by-implication.github.io/multimap-sanity/";></iframe>
+#+END_EXPORT
+
 * Protocols and Classes
 
 Modern mapping libraries have roughly the same features. Beyond displaying the
@@ -371,3 +378,5 @@ Protocols can be used for database connections, display rendering, and more.
 
 In the next part of this series, I'll show you how we dealt with different
 geocoding providers using a webapp framework called fulcro.
+
+Below is a working sample of the code we worked on:
