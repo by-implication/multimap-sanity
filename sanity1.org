@@ -378,3 +378,9 @@ Protocols can be used for database connections, display rendering, and more.
 
 In the next part of this series, I'll show you how we dealt with different
 geocoding providers using a webapp framework called fulcro.
+
+Finally, here is the working sample again, for your reference:
+
+#+BEGIN_EXPORT html
+<iframe style="width: 512px; height: 548px"= src="https://by-implication.github.io/multimap-sanity/";></iframe>
+#+END_EXPORT
